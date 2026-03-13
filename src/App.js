@@ -11,8 +11,8 @@ function App() {
             <Link className="navbar-brand fw-bold" to="/">Hệ thống Đặt vé</Link>
             <div className="collapse navbar-collapse">
               <ul className="navbar-nav ms-auto">
-                <li className="nav-item">
-                  <Link className="nav-link btn btn-outline-light border-0" to="/users">
+                <li className="nav-item fw-bold shadow-sm">
+                  <Link className="nav-link btn btn-outline-dark border-0" to="/users">
                     Quản lý Users
                   </Link>
                 </li>
