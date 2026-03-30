@@ -4,15 +4,11 @@ import api from './api';
 const Users = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    
-    // State dùng cho chức năng Thêm
-    const [newName, setNewName] = useState("");
 
-    // State dùng cho chức năng Sửa
+    const [newName, setNewName] = useState("");
     const [editingId, setEditingId] = useState(null);
     const [editName, setEditName] = useState("");
 
-    // Hàm lấy danh sách người dùng
     const fetchUsers = () => {
         setLoading(true);
         api.get('/users')
@@ -30,133 +26,135 @@ const Users = () => {
         fetchUsers();
     }, []);
 
-    // Hàm Thêm người dùng
     const handleAddUser = (e) => {
         e.preventDefault();
         if (!newName.trim()) return alert("Vui lòng nhập tên!");
-
         api.post('/users', { name: newName })
-            .then(() => {
-                setNewName(""); // Xóa trắng ô input
-                fetchUsers();   // Tải lại danh sách
-            })
-            .catch(error => {
-                console.error("Lỗi khi thêm:", error);
-                fetchUsers(); // Vẫn tải lại phòng trường hợp backend trả về redirect thay vì JSON
-            });
+            .then(() => { setNewName(""); fetchUsers(); })
+            .catch(error => { console.error("Lỗi khi thêm:", error); fetchUsers(); });
     };
 
-    // Hàm Xóa người dùng
     const handleDeleteUser = (id) => {
         if (window.confirm("Bạn có chắc chắn muốn xóa người dùng này?")) {
             api.delete(`/users/${id}`)
-                .then(() => {
-                    fetchUsers();
-                })
-                .catch(error => {
-                    console.error("Lỗi khi xóa:", error);
-                    fetchUsers();
-                });
+                .then(() => fetchUsers())
+                .catch(error => { console.error("Lỗi khi xóa:", error); fetchUsers(); });
         }
     };
 
-    // Hàm Bật chế độ sửa
-    const startEdit = (user) => {
-        setEditingId(user.id);
-        setEditName(user.name);
-    };
+    const startEdit = (user) => { setEditingId(user.id); setEditName(user.name); };
 
-    // Hàm Lưu sau khi sửa
     const saveEdit = (id) => {
         api.put(`/users/${id}`, { name: editName })
-            .then(() => {
-                setEditingId(null); // Tắt chế độ sửa
-                fetchUsers();
-            })
-            .catch(error => {
-                console.error("Lỗi khi cập nhật:", error);
-                setEditingId(null);
-                fetchUsers();
-            });
+            .then(() => { setEditingId(null); fetchUsers(); })
+            .catch(error => { console.error("Lỗi khi cập nhật:", error); setEditingId(null); fetchUsers(); });
     };
 
-    // Giao diện khi đang tải
     if (loading && users.length === 0) return (
-        <div className="d-flex flex-column align-items-center justify-content-center mt-5">
-            <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
-                <span className="visually-hidden">Đang tải...</span>
-            </div>
-            <p className="mt-3 text-muted">Đang tải dữ liệu người dùng...</p>
+        <div className="flex flex-col items-center justify-center mt-20 gap-4">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-gray-500">Đang tải dữ liệu người dùng...</p>
         </div>
     );
 
     return (
-        <div className="p-4 bg-white shadow-sm rounded">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="text-primary fw-bold mb-0">Quản lý người dùng</h2>
-                <span className="badge bg-success fs-6">Tổng: {users.length} users</span>
+        <div className="bg-white shadow rounded-xl p-6">
+
+            {/* Header */}
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-blue-600">Quản lý người dùng</h2>
+                <span className="bg-green-100 text-green-700 text-sm font-semibold px-3 py-1 rounded-full">
+                    Tổng: {users.length} users
+                </span>
             </div>
 
-            {/* Form Thêm người dùng */}
-            <form onSubmit={handleAddUser} className="mb-4 d-flex gap-2">
-                <input 
-                    type="text" 
-                    className="form-control" 
-                    placeholder="Nhập họ và tên người dùng mới..." 
+            {/* Form thêm người dùng */}
+            <form onSubmit={handleAddUser} className="flex gap-2 mb-6">
+                <input
+                    type="text"
+                    className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    placeholder="Nhập họ và tên người dùng mới..."
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                 />
-                <button type="submit" className="btn btn-primary px-4">Thêm</button>
+                <button
+                    type="submit"
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg transition"
+                >
+                    Thêm
+                </button>
             </form>
-            
-            <div className="table-responsive">
-                <table className="table table-hover align-middle border">
-                    <thead className="table-dark">
+
+            {/* Bảng danh sách */}
+            <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left border border-gray-200 rounded-lg overflow-hidden">
+                    <thead className="bg-gray-800 text-white">
                         <tr>
-                            <th style={{ width: '10%', textAlign: 'center' }}>ID</th>
-                            <th style={{ width: '60%' }}>Họ và Tên</th>
-                            <th style={{ width: '30%', textAlign: 'center' }}>Thao tác</th>
+                            <th className="px-4 py-3 text-center w-16">ID</th>
+                            <th className="px-4 py-3">Họ và Tên</th>
+                            <th className="px-4 py-3 text-center w-40">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         {users.length > 0 ? (
-                            users.map(user => (
-                                <tr key={user.id}>
-                                    <td className="text-center text-secondary"><strong>#{user.id}</strong></td>
-                                    
-                                    {/* Cột Tên (Hiển thị Input nếu đang sửa, ngược lại hiển thị Text) */}
-                                    <td>
+                            users.map((user, index) => (
+                                <tr
+                                    key={user.id}
+                                    className={`border-t border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition`}
+                                >
+                                    <td className="px-4 py-3 text-center text-gray-400 font-semibold">
+                                        #{user.id}
+                                    </td>
+                                    <td className="px-4 py-3">
                                         {editingId === user.id ? (
-                                            <input 
-                                                type="text" 
-                                                className="form-control form-control-sm"
+                                            <input
+                                                type="text"
+                                                className="w-full border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                                                 value={editName}
                                                 onChange={(e) => setEditName(e.target.value)}
                                             />
                                         ) : (
-                                            <span className="fw-semibold text-dark">{user.name}</span>
+                                            <span className="font-medium text-gray-800">{user.name}</span>
                                         )}
                                     </td>
-
-                                    {/* Cột Thao tác */}
-                                    <td className="text-center">
+                                    <td className="px-4 py-3 text-center">
                                         {editingId === user.id ? (
-                                            <>
-                                                <button onClick={() => saveEdit(user.id)} className="btn btn-sm btn-success me-2">Lưu</button>
-                                                <button onClick={() => setEditingId(null)} className="btn btn-sm btn-secondary">Hủy</button>
-                                            </>
+                                            <div className="flex justify-center gap-2">
+                                                <button
+                                                    onClick={() => saveEdit(user.id)}
+                                                    className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-3 py-1 rounded transition"
+                                                >
+                                                    Lưu
+                                                </button>
+                                                <button
+                                                    onClick={() => setEditingId(null)}
+                                                    className="bg-gray-400 hover:bg-gray-500 text-white text-xs font-medium px-3 py-1 rounded transition"
+                                                >
+                                                    Hủy
+                                                </button>
+                                            </div>
                                         ) : (
-                                            <>
-                                                <button onClick={() => startEdit(user)} className="btn btn-sm btn-outline-info me-2">Sửa</button>
-                                                <button onClick={() => handleDeleteUser(user.id)} className="btn btn-sm btn-outline-danger">Xóa</button>
-                                            </>
+                                            <div className="flex justify-center gap-2">
+                                                <button
+                                                    onClick={() => startEdit(user)}
+                                                    className="border border-cyan-500 text-cyan-600 hover:bg-cyan-50 text-xs font-medium px-3 py-1 rounded transition"
+                                                >
+                                                    Sửa
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteUser(user.id)}
+                                                    className="border border-red-400 text-red-500 hover:bg-red-50 text-xs font-medium px-3 py-1 rounded transition"
+                                                >
+                                                    Xóa
+                                                </button>
+                                            </div>
                                         )}
                                     </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="3" className="text-center text-muted py-4">
+                                <td colSpan="3" className="text-center text-gray-400 py-8">
                                     Không có dữ liệu người dùng nào trên hệ thống.
                                 </td>
                             </tr>
