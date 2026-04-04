@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Authlayout from '../layouts/Authlayout';
+import Authlayout from '../../layouts/Authlayout';
 import { FaIdCard, FaEnvelope, FaUserTag, FaLock, FaCheckCircle } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 const Register = () => {

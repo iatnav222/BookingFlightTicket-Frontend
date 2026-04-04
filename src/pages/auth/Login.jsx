@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Authlayout from '../layouts/Authlayout';
+import Authlayout from '../../layouts/Authlayout';
 import { FaPlaneDeparture, FaUser, FaLock } from 'react-icons/fa'; // Cần cài react-icons
 import { Link } from 'react-router-dom';
 const Login = () => {
