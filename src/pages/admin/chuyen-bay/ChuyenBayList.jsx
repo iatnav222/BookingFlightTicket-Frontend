@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback} from 'react';
 import { Link } from 'react-router-dom';
 import { 
     FaPlus, FaSearch, FaSyncAlt, FaPlane, FaLongArrowAltRight, 
     FaEdit, FaTrash, FaPlaneDeparture, FaPlaneArrival, FaBoxOpen 
 } from 'react-icons/fa';
 import { chuyenBayApi } from '../../../services/chuyenBayApi';
-
 const ChuyenBayList = () => {
     const [chuyenBays, setChuyenBays] = useState([]);
     const [dsHang, setDsHang] = useState([]);
@@ -23,17 +22,23 @@ const ChuyenBayList = () => {
         fetchCategories();
     }, []);
 
-    const fetchChuyenBays = async () => {
-        setLoading(true);
-        try {
-            const activeFilters = Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== ''));
-            const response = await chuyenBayApi.getDanhSach(activeFilters);
-            // Backend trả về { success: true, data: [...] }
-            setChuyenBays(response.data || []);
-        } catch (error) { console.error(error); } finally { setLoading(false); }
-    };
+    const fetchChuyenBays = useCallback(async () => {
+    setLoading(true);
+    try {
+        const activeFilters = Object.fromEntries(
+            Object.entries(filters).filter(([_, v]) => v !== '')
+        );
+        const response = await chuyenBayApi.getDanhSach(activeFilters);
+        // Backend trả về { success: true, data: [...] }
+        setChuyenBays(response.data || []);
+    } catch (error) { 
+        console.error(error); 
+    } finally { 
+        setLoading(false); 
+    }
+}, [filters]);
 
-    useEffect(() => { fetchChuyenBays(); }, [filters]);
+    useEffect(() => { fetchChuyenBays(); }, [fetchChuyenBays]);
 
     const handleFilterChange = (e) => setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }));
     const resetFilters = () => setFilters({ maHang: '', ngayBay: '', search: '' });
