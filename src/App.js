@@ -4,7 +4,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 // 1. Import Layouts (Khung giao diện)
 import UserLayout from './layouts/Userlayout';
 import AdminLayout from './layouts/Adminlayout';
-
+import ChuyenBayList from './pages/admin/chuyen-bay/ChuyenBayList';
+import ChuyenBayForm from './pages/admin/chuyen-bay/ChuyenBayForm';
 // 2. Import Pages - Nhóm User (Khách hàng)
 // Lưu ý: Đảm bảo bạn đã di chuyển Home.jsx vào thư mục src/pages/user/
 import Home from './pages/user/Home'; 
@@ -38,7 +39,10 @@ function App() {
         {/* Bất kỳ route nào nằm trong khối này đều sẽ được bọc bởi AdminLayout */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminHome />} />
-          {/* Thêm các route quản lý của Admin ở đây (vd: /admin/don-hang) */}
+          <Route path="chuyen-bay" element={<ChuyenBayList />} />
+          <Route path="chuyen-bay/tao" element={<ChuyenBayForm />} />
+          <Route path="chuyen-bay/sua/:id" element={<ChuyenBayForm />} />
+          {/* Thêm các route khác của Admin ở đây (vd: /admin/khuyen-mai) */}
         </Route>
 
         {/* ==========================================
