@@ -20,17 +20,13 @@ const ChuyenBayForm = () => {
     const [dsSanBay, setDsSanBay] = useState([]);
 
     useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const [hangs, mbs, sbs] = await Promise.all([
-                    chuyenBayApi.getHangHangKhong(),
-                    chuyenBayApi.getMayBay(),
-                    chuyenBayApi.getSanBay()
-                ]);
-                setDsHang(hangs.data || hangs);
-                setDsMayBay(mbs.data || mbs);
-                setDsSanBay(sbs.data || sbs);
-            } catch (err) { console.error(err); }
+        const fetchCategories = () => {
+            // Lấy hãng bay
+            chuyenBayApi.getHangHangKhong().then(res => setDsHang(res.data || res)).catch(console.error);
+            // Lấy máy bay
+            chuyenBayApi.getMayBay().then(res => setDsMayBay(res.data || res)).catch(console.error);
+            // Lấy sân bay
+            chuyenBayApi.getSanBay().then(res => setDsSanBay(res.data || res)).catch(console.error);
         };
         fetchCategories();
 
