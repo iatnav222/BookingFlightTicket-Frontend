@@ -34,12 +34,13 @@ export const chuyenBayApi = {
     },
 
     // Các hàm lấy dữ liệu danh mục cho Select box
-    getHangHangKhong: async () => {
-        const response = await api.get('/api/admin/hang-bay');
+   getHangHangKhong: async () => {
+        const response = await api.get('/api/admin/hang-hang-khong');
         return response.data;
     },
-    getMayBay: async () => {
-        const response = await api.get('/api/admin/may-bay'); 
+    getMayBay: async (maHang = '') => {
+        const params = maHang ? { maHang } : {};
+        const response = await api.get('/api/admin/may-bay', { params }); 
         return response.data;
     },
     getSanBay: async () => {
