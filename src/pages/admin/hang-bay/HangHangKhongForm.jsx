@@ -37,7 +37,11 @@ const HangHangKhongForm = () => {
                     });
                     // Nếu có logo cũ, gán link vào preview
                     if (data.logo_url) {
-                        setLogoPreview(`${BACKEND_URL}${encodeURI(data.logo_url)}`);
+                        const finalImageUrl = data.logo_url.startsWith('http') 
+                            ? data.logo_url 
+                            : `${BACKEND_URL}${encodeURI(data.logo_url)}`;
+                            
+                        setLogoPreview(finalImageUrl);
                     }
                 } catch (err) { 
                     setErrorMsg('Lỗi tải dữ liệu!'); 

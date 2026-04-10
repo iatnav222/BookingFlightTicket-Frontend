@@ -106,10 +106,13 @@ const HangHangKhongList = () => {
                                             <td className="p-3 text-center flex justify-center">
                                                 {hang.logo_url ? (
                                                     <img 
-                                                        src={`${BACKEND_URL}${encodeURI(hang.logo_url)}`} 
+                                                        src={hang.logo_url.startsWith('http') ? hang.logo_url : `${BACKEND_URL}${encodeURI(hang.logo_url)}`} 
                                                         alt="Logo" 
                                                         className="h-10 max-w-[100px] object-contain rounded bg-white p-1 border"
-                                                        onError={(e) => { e.target.style.display='none'; e.target.nextSibling.style.display='inline-block'; }}
+                                                        onError={(e) => { 
+                                                            e.target.style.display='none'; 
+                                                            e.target.nextSibling.style.display='inline-block'; 
+                                                        }}
                                                     />
                                                 ) : null}
                                                 <span className="badge bg-gray-100 text-gray-500 border px-2 py-1 rounded text-xs" style={{ display: hang.logo_url ? 'none' : 'inline-block' }}>

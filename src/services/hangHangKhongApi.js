@@ -16,7 +16,6 @@ export const hangHangKhongApi = {
     capNhatHang(id, data) {
         data.append('_method', 'PUT'); 
         return api.post(`/api/admin/hang-hang-khong/${id}`, data, {
-            headers: { 'Content-Type': 'multipart/form-data' }
         });
     },
     xoaHang(id) {
