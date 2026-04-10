@@ -36,8 +36,14 @@ const MayBayForm = () => {
             const fetchDetail = async () => {
                 try {
                     const res = await mayBayApi.getChiTiet(id);
-                    const data = res.data;
-                    setFormData({ ...data });
+                    const data = res.data.data || res.data;
+                    setFormData({
+                        tenMayBay: data.tenMayBay || '',
+                        maHang: data.maHang || '',
+                        soGheTong: data.soGheTong || 180,
+                        loai: data.loai || '',
+                        hangSanXuat: data.hangSanXuat || ''
+                    });
                 } catch (err) { 
                     setErrorMsg('Lỗi tải dữ liệu!'); 
                 }
