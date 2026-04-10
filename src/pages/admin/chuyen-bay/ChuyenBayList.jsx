@@ -8,9 +8,7 @@ import {
 import { chuyenBayApi } from '../../../services/chuyenBayApi';
 
 const ChuyenBayList = () => {
-    // 1. ĐỔI TÊN STATE: Lưu TOÀN BỘ dữ liệu lấy từ API
     const [allChuyenBays, setAllChuyenBays] = useState([]); 
-    
     const [dsHang, setDsHang] = useState([]);
     const [loading, setLoading] = useState(false);
     const [filters, setFilters] = useState({ maHang: '', ngayBay: '', search: '' });
