@@ -5,7 +5,7 @@ import {
     FaEdit, FaTrash, FaBoxOpen, FaAngleLeft, FaAngleRight
 } from 'react-icons/fa';
 import { mayBayApi } from '../../../services/mayBayApi'; 
-
+const BACKEND_URL = 'https://bookingflightticket-backend-new.onrender.com/';
 const MayBayList = () => {
     const [allMayBays, setAllMayBays] = useState([]); 
     const [dsHang, setDsHang] = useState([]);
@@ -128,7 +128,7 @@ const MayBayList = () => {
                                                     <div className="flex items-center gap-2">
                                                         {hang && hang.logo_url ? (
                                                             <img 
-                                                                src={`https://bookingflightticket-backend-new.onrender.com/${encodeURI(hang.logo_url)}`}
+                                                                src={hang.logo_url.startsWith('http') ? hang.logo_url : `${BACKEND_URL}${encodeURI(hang.logo_url)}`} 
                                                                 alt={hang.tenHang} 
                                                                 className="w-8 h-8 object-contain rounded bg-white border border-gray-200 p-0.5"
                                                                 onError={(e) => {
