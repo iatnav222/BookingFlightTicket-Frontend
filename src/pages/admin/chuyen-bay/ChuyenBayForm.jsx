@@ -161,10 +161,6 @@ const ChuyenBayForm = () => {
                                         <input type="datetime-local" name="ngayGioHaCanh" value={formData.ngayGioHaCanh} onChange={handleChange} className="w-full p-2 border rounded outline-none focus:border-blue-500" required />
                                     </div>
                                 </div>
-                                <div className="mb-3">
-                                    <label className="block text-sm font-bold text-gray-700 mb-1">Điểm Dừng</label>
-                                    <input type="text" name="diemDung" value={formData.diemDung} onChange={handleChange} placeholder="VD: Đà Nẵng" className="w-full p-2 border rounded outline-none focus:border-blue-500" />
-                                </div>
                             </div>
                         </div>
                         <div className="flex justify-end mt-6 pt-4 border-t gap-2">
