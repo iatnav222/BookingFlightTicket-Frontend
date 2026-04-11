@@ -1,140 +1,110 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { FaSearch, FaSyncAlt, FaTrash, FaUserShield } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { FaSearch, FaUserShield, FaUserEdit, FaTrash, FaUserLock, FaPlus, FaUser } from 'react-icons/fa';
 import { accountApi } from '../../../services/accountApi';
 
 const AccountList = () => {
-    const navigate = useNavigate();
-
     const [accounts, setAccounts] = useState([]);
-    const [filters, setFilters] = useState({
-        role: '',
-        search: ''
-    });
+    const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
-    const fetchData = useCallback(async () => {
-        const res = await accountApi.getDanhSach(filters);
-        setAccounts(res.data || []);
-    }, [filters]);
+    useEffect(() => { fetchAccounts(); }, []);
 
-    useEffect(() => {
-        fetchData();
-    }, [fetchData]);
+    const fetchAccounts = async () => {
+        setLoading(true);
+        try {
+            const res = await accountApi.getDanhSach();
+            // Đảm bảo accounts luôn là mảng để không bị lỗi .filter
+            setAccounts(Array.isArray(res) ? res : (res.data || []));
+        } catch (err) { 
+            console.error("Lỗi fetch:", err);
+            setAccounts([]);
+        } finally { setLoading(false); }
+    };
 
-    const handleDelete = async (id) => {
-        if (window.confirm("Xóa tài khoản?")) {
-            await accountApi.xoa(id);
-            fetchData();
+    const renderRole = (quyen) => {
+        if (quyen === 'admin') {
+            return <span className="px-2 py-1 text-[10px] font-bold rounded bg-red-100 text-red-700 border border-red-200 uppercase"><FaUserShield className="inline mr-1"/> Quản trị</span>;
         }
+        return <span className="px-2 py-1 text-[10px] font-bold rounded bg-blue-100 text-blue-700 border border-blue-200 uppercase"><FaUser className="inline mr-1"/> Khách hàng</span>;
     };
 
-    const handleChangeRole = async (id, role) => {
-        await accountApi.capNhat(id, { role });
-        fetchData();
-    };
-
-    const renderRole = (role) => {
-        const map = {
-            admin: 'bg-red-100 text-red-600',
-            staff: 'bg-blue-100 text-blue-600',
-            user: 'bg-green-100 text-green-600'
-        };
-        return <span className={`px-2 py-1 rounded ${map[role]}`}>{role}</span>;
-    };
+    // Lọc an toàn: Kiểm tra sự tồn tại của acc.username trước khi includes
+    const filteredAccounts = accounts.filter(acc => 
+        acc.username && acc.username.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
-        <div className="p-6 bg-white rounded-xl shadow">
+        <div className="container-fluid px-4 mt-4 font-['Nunito'] text-[#5a5c69]">
+            <div className="bg-white rounded shadow-[0_0.15rem_1.75rem_0_rgba(58,59,69,0.15)] mb-4 border-none">
+                <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between bg-[#f8f9fc]">
+                    <h6 className="m-0 font-bold text-[#4e73df] text-lg uppercase">Quản Lý Tài Khoản</h6>
+                </div>
 
-            <div className="flex justify-between mb-4">
-                <h2 className="text-xl font-bold">Quản lý tài khoản</h2>
+                <div className="p-4">
+                    <div className="mb-4 bg-[#f8f9fc] p-4 rounded border border-gray-200 flex flex-wrap gap-3 items-center">
+                        <div className="flex flex-1 min-w-[300px]">
+                            <input 
+                                type="text" 
+                                placeholder="Tìm theo tên đăng nhập (username)..." 
+                                className="w-full text-sm p-2 border border-gray-300 rounded outline-none focus:border-[#4e73df]" 
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                    </div>
 
-                <button
-                    onClick={() => navigate('/admin/tai-khoan/tao')}
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
-                >
-                    + Thêm tài khoản
-                </button>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left align-middle border-collapse">
+                            <thead className="bg-[#4e73df] text-white text-[13px] uppercase">
+                                <tr>
+                                    <th className="p-3 border-b font-bold text-center">Mã TK</th>
+                                    <th className="p-3 border-b font-bold">Username</th>
+                                    <th className="p-3 border-b font-bold">Họ Tên</th>
+                                    <th className="p-3 border-b font-bold">Email</th>
+                                    <th className="p-3 border-b font-bold text-center">Quyền</th>
+                                    <th className="p-3 border-b font-bold text-center">Trạng Thái</th>
+                                    <th className="p-3 border-b font-bold text-center">Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody className="text-[14px]">
+                                {loading ? (
+                                    <tr><td colSpan="7" className="text-center py-10 font-bold text-blue-500">Đang tải...</td></tr>
+                                ) : filteredAccounts.length === 0 ? (
+                                    <tr><td colSpan="7" className="text-center py-10 text-gray-400 italic">Không tìm thấy tài khoản nào</td></tr>
+                                ) : (
+                                    filteredAccounts.map(acc => (
+                                        <tr key={acc.maTK} className="hover:bg-gray-50 border-b">
+                                            <td className="p-3 text-center text-gray-500">#{acc.maTK}</td>
+                                            <td className="p-3 font-bold text-[#4e73df]">{acc.username}</td>
+                                            <td className="p-3">{acc.hoten || <span className="text-gray-300">Chưa cập nhật</span>}</td>
+                                            <td className="p-3 text-gray-600">{acc.email}</td>
+                                            <td className="p-3 text-center">{renderRole(acc.quyen)}</td>
+                                            <td className="p-3 text-center">
+                                                {/* SQL dùng bit(1), thường mapping về true/false hoặc 1/0 */}
+                                                {acc.trangThai ? 
+                                                    <span className="text-green-500 font-bold text-xs italic">Hoạt động</span> : 
+                                                    <span className="text-red-500 font-bold text-xs italic">Đã khóa</span>
+                                                }
+                                            </td>
+                                            <td className="p-3">
+                                                <div className="flex justify-center gap-2">
+                                                    <Link to={`/admin/tai-khoan/${acc.maTK}`} className="w-8 h-8 bg-[#f6c23e] text-white rounded flex items-center justify-center hover:bg-[#dda20a] shadow-sm">
+                                                        <FaUserEdit size={12}/>
+                                                    </Link>
+                                                    <button className="w-8 h-8 bg-[#e74a3b] text-white rounded flex items-center justify-center hover:bg-[#be2617] shadow-sm">
+                                                        <FaUserLock size={12}/>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-
-            {/* FILTER */}
-            <div className="flex gap-2 mb-4">
-                <select
-                    onChange={(e) => setFilters({ ...filters, role: e.target.value })}
-                    className="border p-2"
-                >
-                    <option value="">Tất cả role</option>
-                    <option value="admin">Admin</option>
-                    <option value="staff">Nhân viên</option>
-                    <option value="user">User</option>
-                </select>
-
-                <input
-                    placeholder="Tìm email..."
-                    className="border p-2 flex-1"
-                    onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                />
-
-                <button onClick={fetchData} className="bg-blue-500 text-white px-3">
-                    <FaSearch />
-                </button>
-
-                <button onClick={() => setFilters({ role: '', search: '' })} className="bg-gray-400 text-white px-3">
-                    <FaSyncAlt />
-                </button>
-            </div>
-
-            {/* TABLE */}
-            <table className="w-full border">
-                <thead className="bg-gray-100">
-                    <tr>
-                        <th>ID</th>
-                        <th>Email</th>
-                        <th>Họ tên</th>
-                        <th>Role</th>
-                        <th>Đổi quyền</th>
-                        <th>Hành động</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {accounts.map(acc => (
-                        <tr key={acc.id} className="border-t">
-                            <td>#{acc.id}</td>
-                            <td>{acc.email}</td>
-                            <td>{acc.name}</td>
-                            <td>{renderRole(acc.role)}</td>
-
-                            {/* 🔥 phân quyền nhanh */}
-                            <td>
-                                <select
-                                    value={acc.role}
-                                    onChange={(e) => handleChangeRole(acc.id, e.target.value)}
-                                >
-                                    <option value="admin">Admin</option>
-                                    <option value="staff">Staff</option>
-                                    <option value="user">User</option>
-                                </select>
-                            </td>
-
-                            <td className="flex gap-2">
-                                <button
-                                    onClick={() => navigate(`/admin/tai-khoan/${acc.id}`)}
-                                    className="bg-blue-500 text-white p-2"
-                                >
-                                    <FaUserShield />
-                                </button>
-
-                                <button
-                                    onClick={() => handleDelete(acc.id)}
-                                    className="bg-red-500 text-white p-2"
-                                >
-                                    <FaTrash />
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
         </div>
     );
 };

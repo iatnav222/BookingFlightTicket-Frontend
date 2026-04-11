@@ -19,18 +19,11 @@ const ChuyenBayForm = () => {
     const [dsMayBay, setDsMayBay] = useState([]);
     const [dsSanBay, setDsSanBay] = useState([]);
 
+    // Lấy Hãng và Sân bay khi tải trang
     useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const [hangs, mbs, sbs] = await Promise.all([
-                    chuyenBayApi.getHangHangKhong(),
-                    chuyenBayApi.getMayBay(),
-                    chuyenBayApi.getSanBay()
-                ]);
-                setDsHang(hangs.data || hangs);
-                setDsMayBay(mbs.data || mbs);
-                setDsSanBay(sbs.data || sbs);
-            } catch (err) { console.error(err); }
+        const fetchCategories = () => {
+            chuyenBayApi.getHangHangKhong().then(res => setDsHang(res.data || res)).catch(console.error);
+            chuyenBayApi.getSanBay().then(res => setDsSanBay(res.data || res)).catch(console.error);
         };
         fetchCategories();
 
@@ -53,9 +46,31 @@ const ChuyenBayForm = () => {
         }
     }, [id, isEditMode]);
 
+    // ĐÃ THÊM: Theo dõi khi maHang thay đổi thì gọi lại danh sách máy bay
+    useEffect(() => {
+        if (formData.maHang) {
+            chuyenBayApi.getMayBay(formData.maHang)
+                .then(res => setDsMayBay(res.data || res))
+                .catch(console.error);
+        } else {
+            setDsMayBay([]); // Xóa danh sách nếu chưa chọn hãng
+        }
+    }, [formData.maHang]);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(p => ({ ...p, [name]: value, ...(name === 'soGheTong' && !isEditMode ? { soGheConLai: value } : {}) }));
+        setFormData(p => {
+            const newData = { 
+                ...p, 
+                [name]: value, 
+                ...(name === 'soGheTong' && !isEditMode ? { soGheConLai: value } : {}) 
+            };
+            // ĐÃ THÊM: Nếu đổi hãng bay thì reset lựa chọn máy bay
+            if (name === 'maHang') {
+                newData.maMayBay = '';
+            }
+            return newData;
+        });
     };
 
     const handleSubmit = async (e) => {
@@ -71,6 +86,7 @@ const ChuyenBayForm = () => {
 
     return (
         <div className="container-fluid mt-4 font-sans text-gray-800">
+            {/* Giữ nguyên cấu trúc HTML bên dưới của bạn */}
             <div className="bg-white rounded shadow-md mb-4 border border-gray-200">
                 <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center bg-gray-50">
                     <h5 className="m-0 font-bold text-[#4e73df]">{isEditMode ? `Cập Nhật #${id}` : 'Thêm Mới'}</h5>
@@ -91,12 +107,11 @@ const ChuyenBayForm = () => {
                                 </div>
                                 <div className="mb-3">
                                     <label className="block text-sm font-bold text-gray-700 mb-1">Máy Bay *</label>
-                                    <select name="maMayBay" value={formData.maMayBay} onChange={handleChange} className="w-full p-2 border rounded focus:border-blue-500 outline-none" required>
-                                        <option value="">-- Chọn Máy Bay --</option>
+                                    <select name="maMayBay" value={formData.maMayBay} onChange={handleChange} className="w-full p-2 border rounded focus:border-blue-500 outline-none" required disabled={!formData.maHang}>
+                                        <option value="">{formData.maHang ? "-- Chọn Máy Bay --" : "-- Vui lòng chọn hãng trước --"}</option>
                                         {dsMayBay.map(m => <option key={m.maMayBay} value={m.maMayBay}>{m.tenMayBay}</option>)}
                                     </select>
                                 </div>
-                                {/* Layout Fix: Tổng số ghế */}
                                 <div className={`grid ${isEditMode ? 'grid-cols-2 gap-3' : 'grid-cols-1'} mb-3`}>
                                     <div>
                                         <label className="block text-sm font-bold text-gray-700 mb-1">Tổng Số Ghế *</label>
@@ -145,10 +160,6 @@ const ChuyenBayForm = () => {
                                         <label className="block text-sm font-bold text-gray-700 mb-1">Hạ Cánh *</label>
                                         <input type="datetime-local" name="ngayGioHaCanh" value={formData.ngayGioHaCanh} onChange={handleChange} className="w-full p-2 border rounded outline-none focus:border-blue-500" required />
                                     </div>
-                                </div>
-                                <div className="mb-3">
-                                    <label className="block text-sm font-bold text-gray-700 mb-1">Điểm Dừng</label>
-                                    <input type="text" name="diemDung" value={formData.diemDung} onChange={handleChange} placeholder="VD: Đà Nẵng" className="w-full p-2 border rounded outline-none focus:border-blue-500" />
                                 </div>
                             </div>
                         </div>

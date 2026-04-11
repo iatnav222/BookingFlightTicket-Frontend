@@ -1,27 +1,21 @@
 import api from '../api';
 
 export const orderApi = {
-    // 1. Danh sách đơn hàng
     getDanhSach: async (filters = {}) => {
-        const res = await api.get('/api/admin/don-hang', { params: filters });
-        return res.data;
+        const response = await api.get('/api/admin/don-hang', { params: filters });
+        return response.data;
     },
-
-    // 2. Chi tiết
+    xoaDonHang: async (id) => {
+        const response = await api.delete(`/api/admin/don-hang/${id}`);
+        return response.data;
+    },
+    // Thêm vào file orderApi.js của bạn
     getChiTiet: async (id) => {
-        const res = await api.get(`/api/admin/don-hang/${id}`);
-        return res.data;
+        const response = await api.get(`/api/admin/don-hang/${id}`);
+        return response.data;
     },
-
-    // 3. Cập nhật trạng thái
-    capNhat: async (id, data) => {
-        const res = await api.put(`/api/admin/don-hang/${id}`, data);
-        return res.data;
-    },
-
-    // 4. Xóa
-    xoa: async (id) => {
-        const res = await api.delete(`/api/admin/don-hang/${id}`);
-        return res.data;
+    capNhatDonHang: async (id, data) => {
+        const response = await api.put(`/api/admin/don-hang/${id}`, data);
+        return response.data;
     }
 };

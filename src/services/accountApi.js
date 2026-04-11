@@ -1,31 +1,20 @@
 import api from '../api';
 
 export const accountApi = {
-    
-
-
     getDanhSach: async (filters = {}) => {
-        const res = await api.get('/api/admin/tai-khoan', { params: filters });
-        return res.data;
+        const response = await api.get('/api/admin/tai-khoan', { params: filters });
+        return response.data;
     },
-
-    getChiTiet: async (id) => {
-        const res = await api.get(`/api/admin/tai-khoan/${id}`);
-        return res.data;
+    getLoaiTaiKhoan: async () => {
+        const response = await api.get('/api/admin/loai-tai-khoan');
+        return response.data;
     },
-
-    tao: async (data) => {
-        const res = await api.post('/api/admin/tai-khoan', data);
-        return res.data;
+    capNhatTaiKhoan: async (id, data) => {
+        const response = await api.put(`/api/admin/tai-khoan/${id}`, data);
+        return response.data;
     },
-
-    capNhat: async (id, data) => {
-        const res = await api.put(`/api/admin/tai-khoan/${id}`, data);
-        return res.data;
-    },
-
-    xoa: async (id) => {
-        const res = await api.delete(`/api/admin/tai-khoan/${id}`);
-        return res.data;
+    xoaTaiKhoan: async (id) => {
+        const response = await api.delete(`/api/admin/tai-khoan/${id}`);
+        return response.data;
     }
 };

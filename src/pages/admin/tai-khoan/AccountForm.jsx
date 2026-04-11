@@ -1,146 +1,159 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { FaSave, FaArrowLeft, FaShieldAlt, FaIdCard } from 'react-icons/fa';
 import { accountApi } from '../../../services/accountApi';
 
 const AccountForm = () => {
     const { id } = useParams();
-    const isEdit = !!id;
-
-    const [form, setForm] = useState({
-        name: '',
-        email: '',
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    
+    // Khởi tạo state khớp với cấu trúc bảng taikhoan và thongtin_canhan trong SQL
+    const [formData, setFormData] = useState({
         username: '',
-        password: '',
-        password_confirmation: '',
-        role: 'user'
+        quyen: 'user',
+        trangThai: 1,
+        thongtin_canhan: {
+            hoTen: '',
+            email: '',
+            soDienThoai: ''
+        }
     });
 
-    const [error, setError] = useState('');
-
     useEffect(() => {
-        if (isEdit) {
-            accountApi.getChiTiet(id).then(res => {
-                const data = res.data || res;
-                setForm({
-                    ...form,
-                    ...data,
-                    password: '',
-                    password_confirmation: ''
-                });
-            });
+        if (id) {
+            fetchAccountDetail();
+        } else {
+            setLoading(false);
         }
     }, [id]);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setForm(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
-
-        // 🔐 validate password
-        if (!isEdit && form.password !== form.password_confirmation) {
-            setError("Mật khẩu không khớp");
-            return;
-        }
-
+    const fetchAccountDetail = async () => {
         try {
-            if (isEdit) {
-                await accountApi.capNhat(id, form);
-            } else {
-                await accountApi.tao(form);
+            const res = await accountApi.getDanhSach(); // Giả định lấy từ danh sách hoặc bạn có api.getChiTiet
+            const allAccs = Array.isArray(res) ? res : (res.data || []);
+            const current = allAccs.find(a => a.maTK === parseInt(id));
+            
+            if (current) {
+                setFormData({
+                    ...current,
+                    // Đảm bảo thongtin_canhan không bị null để tránh lỗi UI
+                    thongtin_canhan: current.thongtin_canhan || { hoTen: '', email: '', soDienThoai: '' }
+                });
             }
-            alert("Thành công");
         } catch (err) {
-            setError(err.response?.data?.message || "Lỗi server");
+            console.error("Lỗi tải chi tiết:", err);
+        } finally {
+            setLoading(false);
         }
     };
+
+    const handleSave = async (e) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            await accountApi.capNhatTaiKhoan(id, {
+                quyen: formData.quyen,
+                trangThai: formData.trangThai
+            });
+            alert("Cập nhật quyền hạn thành công!");
+            navigate('/admin/tai-khoan');
+        } catch (err) {
+            alert("Có lỗi xảy ra khi lưu.");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    if (loading) return <div className="p-10 text-center font-bold text-[#4e73df]">Đang tải dữ liệu tài khoản...</div>;
 
     return (
-        <div className="p-6 bg-white rounded-xl shadow max-w-lg">
-            <h2 className="text-xl font-bold mb-4">
-                {isEdit ? "Sửa tài khoản" : "Thêm tài khoản"}
-            </h2>
+        <div className="container-fluid px-4 mt-4 font-['Nunito'] text-[#5a5c69]">
+            <div className="bg-white rounded shadow-[0_0.15rem_1.75rem_0_rgba(58,59,69,0.15)] max-w-4xl mx-auto overflow-hidden border-none">
+                <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between bg-[#f8f9fc]">
+                    <h6 className="m-0 font-bold text-[#4e73df] text-lg uppercase">
+                        Thiết Lập Tài Khoản: <span className="text-gray-600">{formData.username}</span>
+                    </h6>
+                    <button onClick={() => navigate('/admin/tai-khoan')} className="flex items-center px-3 py-1.5 text-xs font-semibold text-white bg-[#858796] rounded hover:bg-[#717384] transition shadow-sm">
+                        <FaArrowLeft className="mr-1" /> QUAY LẠI
+                    </button>
+                </div>
 
-            {error && (
-                <div className="mb-3 text-red-500">{error}</div>
-            )}
+                <form onSubmit={handleSave} className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        {/* Cột 1: Quyền hạn & Trạng thái */}
+                        <div className="bg-[#f8f9fc] p-4 rounded border border-gray-200">
+                            <h5 className="text-[#4e73df] font-bold mb-4 flex items-center text-sm border-b pb-2 border-gray-300">
+                                <FaShieldAlt className="mr-2"/> PHÂN QUYỀN HỆ THỐNG
+                            </h5>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Nhóm quyền</label>
+                                    <select 
+                                        className="w-full p-2 border rounded text-sm font-bold outline-none bg-white"
+                                        value={formData.quyen}
+                                        onChange={(e) => setFormData({...formData, quyen: e.target.value})}
+                                    >
+                                        <option value="user">Khách hàng (User)</option>
+                                        <option value="admin">Quản trị viên (Admin)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Trạng thái tài khoản</label>
+                                    <select 
+                                        className="w-full p-2 border rounded text-sm font-bold outline-none bg-white"
+                                        value={formData.trangThai ? 1 : 0}
+                                        onChange={(e) => setFormData({...formData, trangThai: parseInt(e.target.value)})}
+                                    >
+                                        <option value={1}>✅ Đang hoạt động</option>
+                                        <option value={0}>🔒 Khóa truy cập</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
 
-            <form onSubmit={handleSubmit} className="space-y-3">
+                        {/* Cột 2: Thông tin định danh (Dữ liệu từ bảng thongtin_canhan) */}
+                        <div className="bg-[#f8f9fc] p-4 rounded border border-gray-200">
+                            <h5 className="text-[#1cc88a] font-bold mb-4 flex items-center text-sm border-b pb-2 border-gray-300">
+                                <FaIdCard className="mr-2"/> THÔNG TIN ĐỊNH DANH
+                            </h5>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase">Họ và tên khách hàng</label>
+                                    <p className="text-sm font-bold text-gray-800 border-b border-gray-200 pb-1">
+                                        {/* Sử dụng dấu ? để tránh crash nếu thongtin_canhan bị null */}
+                                        {formData.thongtin_canhan?.hoTen || "Chưa cập nhật"}
+                                    </p>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase">Email đăng ký</label>
+                                    <p className="text-sm font-bold text-gray-800 border-b border-gray-200 pb-1">
+                                        {formData.thongtin_canhan?.email || "N/A"}
+                                    </p>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase">Số điện thoại</label>
+                                    <p className="text-sm font-bold text-gray-800 border-b border-gray-200 pb-1">
+                                        {formData.thongtin_canhan?.soDienThoai || "N/A"}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                {/* Họ tên */}
-                <input
-                    name="name"
-                    placeholder="Họ tên"
-                    value={form.name}
-                    onChange={handleChange}
-                    className="w-full border p-2"
-                    required
-                />
-
-                {/* Email */}
-                <input
-                    name="email"
-                    placeholder="Email"
-                    value={form.email}
-                    onChange={handleChange}
-                    className="w-full border p-2"
-                    required
-                />
-
-                {/* Username */}
-                <input
-                    name="username"
-                    placeholder="Tên đăng nhập"
-                    value={form.username}
-                    onChange={handleChange}
-                    className="w-full border p-2"
-                    required
-                />
-
-                {/* Password chỉ hiện khi tạo */}
-                {!isEdit && (
-                    <>
-                        <input
-                            type="password"
-                            name="password"
-                            placeholder="Mật khẩu"
-                            value={form.password}
-                            onChange={handleChange}
-                            className="w-full border p-2"
-                            required
-                        />
-
-                        <input
-                            type="password"
-                            name="password_confirmation"
-                            placeholder="Nhập lại mật khẩu"
-                            value={form.password_confirmation}
-                            onChange={handleChange}
-                            className="w-full border p-2"
-                            required
-                        />
-                    </>
-                )}
-
-                {/* Role */}
-                <select
-                    name="role"
-                    value={form.role}
-                    onChange={handleChange}
-                    className="w-full border p-2"
-                >
-                    <option value="admin">Admin</option>
-                    <option value="staff">Staff</option>
-                    <option value="user">User</option>
-                </select>
-
-                <button className="bg-blue-500 text-white px-4 py-2 w-full">
-                    Lưu
-                </button>
-            </form>
+                    <div className="mt-6 pt-4 border-t flex justify-end">
+                        <button 
+                            type="submit" 
+                            disabled={saving}
+                            className="px-6 py-2 bg-[#4e73df] text-white rounded font-bold hover:bg-[#2e59d9] shadow-md transition text-sm flex items-center uppercase"
+                        >
+                            {saving ? "ĐANG XỬ LÝ..." : <><FaSave className="mr-2"/> Lưu thay đổi quyền hạn</>}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 };
