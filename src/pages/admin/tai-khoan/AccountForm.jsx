@@ -7,12 +7,12 @@ const AccountForm = () => {
     const isEdit = !!id;
 
     const [form, setForm] = useState({
-        name: '',
+        hoten: '',
         email: '',
-        username: '',
+        userhoten: '',
         password: '',
         password_confirmation: '',
-        role: 'user'
+        quyen: 'user'
     });
 
     const [error, setError] = useState('');
@@ -21,19 +21,20 @@ const AccountForm = () => {
         if (isEdit) {
             accountApi.getChiTiet(id).then(res => {
                 const data = res.data || res;
-                setForm({
-                    ...form,
+                // Dùng prevForm (trạng thái trước đó) thay vì gọi trực tiếp biến form
+                setForm(prevForm => ({
+                    ...prevForm,
                     ...data,
                     password: '',
                     password_confirmation: ''
-                });
+                }));
             });
         }
-    }, [id]);
+    }, [id, isEdit]);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setForm(prev => ({ ...prev, [name]: value }));
+        const { hoten, value } = e.target;
+        setForm(prev => ({ ...prev, [hoten]: value }));
     };
 
     const handleSubmit = async (e) => {
@@ -72,9 +73,9 @@ const AccountForm = () => {
 
                 {/* Họ tên */}
                 <input
-                    name="name"
+                    hoten="hoten"
                     placeholder="Họ tên"
-                    value={form.name}
+                    value={form.hoten}
                     onChange={handleChange}
                     className="w-full border p-2"
                     required
@@ -82,7 +83,7 @@ const AccountForm = () => {
 
                 {/* Email */}
                 <input
-                    name="email"
+                    hoten="email"
                     placeholder="Email"
                     value={form.email}
                     onChange={handleChange}
@@ -92,7 +93,7 @@ const AccountForm = () => {
 
                 {/* Username */}
                 <input
-                    name="username"
+                    hoten="username"
                     placeholder="Tên đăng nhập"
                     value={form.username}
                     onChange={handleChange}
@@ -105,7 +106,7 @@ const AccountForm = () => {
                     <>
                         <input
                             type="password"
-                            name="password"
+                            hoten="password"
                             placeholder="Mật khẩu"
                             value={form.password}
                             onChange={handleChange}
@@ -115,7 +116,7 @@ const AccountForm = () => {
 
                         <input
                             type="password"
-                            name="password_confirmation"
+                            hoten="password_confirmation"
                             placeholder="Nhập lại mật khẩu"
                             value={form.password_confirmation}
                             onChange={handleChange}
@@ -127,7 +128,7 @@ const AccountForm = () => {
 
                 {/* Role */}
                 <select
-                    name="role"
+                    hoten="role"
                     value={form.role}
                     onChange={handleChange}
                     className="w-full border p-2"
