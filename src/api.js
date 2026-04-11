@@ -1,5 +1,5 @@
 import axios from 'axios';
-const API_BASE_URL = 'https://bookingflightticket-backend.onrender.com';
+const API_BASE_URL = 'https://bookingflightticket-backend-new.onrender.com';
 const api = axios.create({
     baseURL: API_BASE_URL,
 });
