@@ -98,17 +98,22 @@ const AccountList = () => {
 
                 <tbody>
                     {accounts.map(acc => (
-                        <tr key={acc.id} className="border-t">
-                            <td>#{acc.id}</td>
+                        // 1. Sửa acc.id thành acc.maTK
+                        <tr key={acc.maTK} className="border-t">
+                            <td>#{acc.maTK}</td>
                             <td>{acc.email}</td>
-                            <td>{acc.name}</td>
-                            <td>{renderRole(acc.role)}</td>
+                            
+                            {/* 2. Sửa acc.name thành acc.hoten */}
+                            <td>{acc.hoten}</td>
+                            
+                            {/* 3. Sửa acc.role thành acc.quyen */}
+                            <td>{renderRole(acc.quyen)}</td>
 
                             {/* 🔥 phân quyền nhanh */}
                             <td>
                                 <select
-                                    value={acc.role}
-                                    onChange={(e) => handleChangeRole(acc.id, e.target.value)}
+                                    value={acc.quyen}
+                                    onChange={(e) => handleChangeRole(acc.maTK, e.target.value)}
                                 >
                                     <option value="admin">Admin</option>
                                     <option value="staff">Staff</option>
@@ -118,15 +123,15 @@ const AccountList = () => {
 
                             <td className="flex gap-2">
                                 <button
-                                    onClick={() => navigate(`/admin/tai-khoan/${acc.id}`)}
-                                    className="bg-blue-500 text-white p-2"
+                                    onClick={() => navigate(`/admin/tai-khoan/${acc.maTK}`)}
+                                    className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
                                 >
                                     <FaUserShield />
                                 </button>
 
                                 <button
-                                    onClick={() => handleDelete(acc.id)}
-                                    className="bg-red-500 text-white p-2"
+                                    onClick={() => handleDelete(acc.maTK)}
+                                    className="bg-red-500 text-white p-2 rounded hover:bg-red-600 transition"
                                 >
                                     <FaTrash />
                                 </button>

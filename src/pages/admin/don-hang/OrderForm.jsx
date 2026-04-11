@@ -24,12 +24,17 @@ const OrderForm = () => {
 
     return (
         <div className="p-6 bg-white rounded-xl shadow max-w-xl">
-            <h2 className="text-xl font-bold mb-4">Chi tiết đơn hàng #{id}</h2>
+            <h2 className="text-xl font-bold mb-4">
+                Chi tiết đơn hàng <span className="text-blue-600">#{order.maCodeDonHang || id}</span>
+            </h2>
 
-            <div className="space-y-3 mb-4">
-                <p><b>Khách hàng:</b> {order.tenKhach}</p>
-                <p><b>Email:</b> {order.email}</p>
-                <p><b>Tổng tiền:</b> {order.tongTien}</p>
+            <div className="space-y-3 mb-4 bg-gray-50 p-4 rounded border">
+                {/* Lấy đúng từ object thongTinLienHe */}
+                <p><b>Khách hàng:</b> {order.thongTinLienHe?.ten || order.taikhoan?.hoten}</p>
+                <p><b>Email:</b> {order.thongTinLienHe?.email || order.taikhoan?.email}</p>
+                <p><b>Số điện thoại:</b> {order.thongTinLienHe?.sdt}</p>
+                <p><b>Phương thức thanh toán:</b> {order.phuongThucThanhToan}</p>
+                <p><b>Tổng tiền:</b> <span className="text-red-500 font-bold">{order.tongTien?.toLocaleString('vi-VN')} VNĐ</span></p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
