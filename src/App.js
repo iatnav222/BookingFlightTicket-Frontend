@@ -10,6 +10,14 @@ import MayBayList from './pages/admin/may-bay/MayBayList';
 import MayBayForm from './pages/admin/may-bay/MayBayForm';
 import HangHangKhongList from './pages/admin/hang-bay/HangHangKhongList';
 import HangHangKhongForm from './pages/admin/hang-bay/HangHangKhongForm';
+
+import SanBayList from './pages/admin/sanbay/SanBayList';
+import SanBayForm from './pages/admin/sanbay/SanBayForm';
+import KhuyenMaiList from './pages/admin/khuyen-mai/KhuyenmaiList';
+import KhuyenMaiForm from './pages/admin/khuyen-mai/KhuyenmaiForm';
+import GiaVeForm from './pages/admin/gia-ve/GiaveForm';
+import GiaVeList from './pages/admin/gia-ve/GiaveList';
+
 // 2. Import Pages - Nhóm User (Khách hàng)
 // Lưu ý: Đảm bảo bạn đã di chuyển Home.jsx vào thư mục src/pages/user/
 import Home from './pages/user/Home'; 
@@ -52,7 +60,15 @@ function App() {
           <Route path="hang-hang-khong" element={<HangHangKhongList />} />
           <Route path="hang-hang-khong/tao" element={<HangHangKhongForm />} />
           <Route path="hang-hang-khong/sua/:id" element={<HangHangKhongForm />} />
-          {/* Thêm các route khác của Admin ở đây (vd: /admin/khuyen-mai) */}
+         
+          <Route path="san-bay" element={<SanBayList />} />
+          <Route path="san-bay/tao" element={<SanBayForm />} />
+          <Route path="san-bay/sua/:id" element={<SanBayForm />} />
+          <Route path="khuyen-mai" element={<KhuyenMaiList />} />
+          <Route path="khuyen-mai/tao" element={<KhuyenMaiForm />} />
+          <Route path="khuyen-mai/sua/:id" element={<KhuyenMaiForm />} />
+          <Route path="gia-ve" element={<GiaVeList />} />
+          <Route path="gia-ve/sua/:id" element={<GiaVeForm />} />
         </Route>
 
         {/* ==========================================
