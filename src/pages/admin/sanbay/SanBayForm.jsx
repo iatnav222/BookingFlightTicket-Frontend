@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaSave, FaArrowLeft, FaInfoCircle, FaMapMarkerAlt, FaImage, FaPlaneDeparture } from 'react-icons/fa';
 import { sanBayApi } from '../../../services/Sanbayapi';
@@ -21,38 +21,38 @@ const SanBayForm = () => {
 
     const BASE_URL = 'https://bookingflightticket-backend-new.onrender.com';
 
+   const loadSanBayDetail = useCallback(async () => {
+    setLoading(true);
+    try {
+        const res = await sanBayApi.getChiTiet(id);
+        const data = res.data.data || res.data;
+        
+        setFormData({
+            maCode: data.maCode || '',
+            tenSanBay: data.tenSanBay || '',
+            thanhPho: data.thanhPho || '',
+            hinhAnh: null
+        });
+
+        const path = data.hinh_anh_url || data.hinhAnh;
+        if (path) {
+            const fullPath = path.startsWith('http') 
+                ? path 
+                : `${BASE_URL}/storage/${path.replace(/^\//, '')}`;
+            setPreviewImage(`${fullPath}?t=${new Date().getTime()}`);
+        }
+    } catch (err) {
+        setErrorMsg('Không thể tải thông tin sân bay!');
+    } finally {
+        setLoading(false);
+    }
+}, [id]); // Phụ thuộc vào id
+
     useEffect(() => {
         if (isEditMode) {
             loadSanBayDetail();
         }
-    }, [id]);
-
-    const loadSanBayDetail = async () => {
-        setLoading(true);
-        try {
-            const res = await sanBayApi.getChiTiet(id);
-            const data = res.data.data || res.data;
-            
-            setFormData({
-                maCode: data.maCode || '',
-                tenSanBay: data.tenSanBay || '',
-                thanhPho: data.thanhPho || '',
-                hinhAnh: null
-            });
-
-            const path = data.hinh_anh_url || data.hinhAnh;
-            if (path) {
-                const fullPath = path.startsWith('http') 
-                    ? path 
-                    : `${BASE_URL}/storage/${path.replace(/^\//, '')}`;
-                setPreviewImage(`${fullPath}?t=${new Date().getTime()}`);
-            }
-        } catch (err) {
-            setErrorMsg('Không thể tải thông tin sân bay!');
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [isEditMode, loadSanBayDetail]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;

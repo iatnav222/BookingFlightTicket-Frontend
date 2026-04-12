@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { FaPlus, FaSearch, FaEdit, FaTrash, FaCalendarAlt } from 'react-icons/fa';
 import { promotionApi } from '../../../services/KhuyenmaiApi';
@@ -10,21 +10,22 @@ const KhuyenMaiList = () => {
     const [loading, setLoading] = useState(false);
     const [keyword, setKeyword] = useState('');
 
+
+    const fetchPromotions = useCallback(async () => {
+    setLoading(true);
+    try {
+        const res = await promotionApi.getDanhSach({ keyword });
+        setDsKhuyenMai(res.data.data || []);
+    } catch (error) {
+        console.error("Lỗi lấy danh sách khuyến mãi:", error);
+    } finally {
+        setLoading(false);
+    }
+    }, [keyword]);
+
     useEffect(() => {
         fetchPromotions();
-    }, []);
-
-    const fetchPromotions = async () => {
-        setLoading(true);
-        try {
-            const res = await promotionApi.getDanhSach({ keyword });
-            setDsKhuyenMai(res.data.data || []);
-        } catch (error) {
-            console.error("Lỗi lấy danh sách khuyến mãi:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [fetchPromotions]);
 
     const handleDelete = async (id) => {
         if (window.confirm(`Bạn có chắc muốn xóa chương trình khuyến mãi này không?`)) {

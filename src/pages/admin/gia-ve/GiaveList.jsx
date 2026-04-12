@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { FaSearch, FaEdit, FaTrash, FaPlus, FaCalendarAlt } from 'react-icons/fa';
 import { priceApi } from '../../../services/GiaveApi';
@@ -7,24 +7,23 @@ const GiaVeList = () => {
     const [dsGiaVe, setDsGiaVe] = useState([]);
     const [loading, setLoading] = useState(false);
     const [keyword, setKeyword] = useState('');
-    const [selectedType, setSelectedType] = useState('');
+    const [selectedType, setSelectedType] = useState(''); 
+
+    const fetchPrices = useCallback(async () => {
+    setLoading(true);
+    try {
+        const res = await priceApi.getDanhSach({ keyword });
+        setDsGiaVe(res.data.data || []);
+    } catch (error) {
+        console.error("Lỗi lấy danh sách giá vé:", error);
+    } finally {
+        setLoading(false);
+    }
+    }, [keyword]); // Hàm này sẽ thay đổi khi keyword thay đổi
 
     useEffect(() => { 
         fetchPrices(); 
-    }, []);
-
-    const fetchPrices = async () => {
-        setLoading(true);
-        try {
-            const res = await priceApi.getDanhSach({ keyword });
-            
-            setDsGiaVe(res.data.data || []);
-        } catch (error) {
-            console.error("Lỗi lấy danh sách giá vé:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+}, [fetchPrices]);
 
     const handleDelete = async (id) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa cấu hình giá vé này không?')) {
