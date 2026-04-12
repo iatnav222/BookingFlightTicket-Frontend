@@ -11,8 +11,9 @@ import ChuyenBayList from './pages/admin/chuyen-bay/ChuyenBayList';
 import ChuyenBayForm from './pages/admin/chuyen-bay/ChuyenBayForm';
 import OrderList from './pages/admin/don-hang/Orderlist';
 import OrderForm from './pages/admin/don-hang/OrderForm';
-import AccountList from './pages/admin/tai-khoan/AccountList';
-import AccountForm from './pages/admin/tai-khoan/AccountForm';
+import TaiKhoanForm from './pages/admin/tai-khoan/TaiKhoanForm';
+import TaiKhoanList from './pages/admin/tai-khoan/TaiKhoanList';
+import TaiKhoanShow from './pages/admin/tai-khoan/TaiKhoanShow';
 import MayBayList from './pages/admin/may-bay/MayBayList';
 import MayBayForm from './pages/admin/may-bay/MayBayForm';
 import HangHangKhongList from './pages/admin/hang-bay/HangHangKhongList';
@@ -52,10 +53,11 @@ function App() {
           <Route path="don-hang/:id" element={<OrderForm />} />
 
           {/* Quản lý Tài Khoản */}
-          <Route path="tai-khoan" element={<AccountList />} />
-          <Route path="tai-khoan/tao" element={<AccountForm />} />
-          <Route path="tai-khoan/:id" element={<AccountForm />} />
-
+          <Route path="tai-khoan" element={<TaiKhoanList />} />
+          <Route path="tai-khoan/tao" element={<TaiKhoanForm />} />
+          <Route path="tai-khoan/sua/:id" element={<TaiKhoanForm />} />
+          <Route path="tai-khoan/xem/:id" element={<TaiKhoanShow />} />
+          
           {/* Quản lý Máy Bay */}
           <Route path="may-bay" element={<MayBayList/>} />
           <Route path="may-bay/tao" element={<MayBayForm />} />
