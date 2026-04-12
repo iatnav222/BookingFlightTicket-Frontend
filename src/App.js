@@ -11,12 +11,19 @@ import ChuyenBayList from './pages/admin/chuyen-bay/ChuyenBayList';
 import ChuyenBayForm from './pages/admin/chuyen-bay/ChuyenBayForm';
 import OrderList from './pages/admin/don-hang/Orderlist';
 import OrderForm from './pages/admin/don-hang/OrderForm';
-import AccountList from './pages/admin/tai-khoan/AccountList';
-import AccountForm from './pages/admin/tai-khoan/AccountForm';
+import TaiKhoanForm from './pages/admin/tai-khoan/TaiKhoanForm';
+import TaiKhoanList from './pages/admin/tai-khoan/TaiKhoanList';
+import TaiKhoanShow from './pages/admin/tai-khoan/TaiKhoanShow';
 import MayBayList from './pages/admin/may-bay/MayBayList';
 import MayBayForm from './pages/admin/may-bay/MayBayForm';
 import HangHangKhongList from './pages/admin/hang-bay/HangHangKhongList';
 import HangHangKhongForm from './pages/admin/hang-bay/HangHangKhongForm';
+import SanBayList from './pages/admin/sanbay/SanBayList';
+import SanBayForm from './pages/admin/sanbay/SanBayForm';
+import GiaVeList from './pages/admin/gia-ve/GiaVeList';
+import GiaVeForm from './pages/admin/gia-ve/GiaVeForm';
+import KhuyenMaiList from './pages/admin/khuyen-mai/KhuyenMaiList';
+import KhuyenMaiForm from './pages/admin/khuyen-mai/KhuyenMaiForm';
 
 // 3. Import Pages - Nhóm User & Auth
 import Home from './pages/user/Home'; 
@@ -52,9 +59,10 @@ function App() {
           <Route path="don-hang/:id" element={<OrderForm />} />
 
           {/* Quản lý Tài Khoản */}
-          <Route path="tai-khoan" element={<AccountList />} />
-          <Route path="tai-khoan/tao" element={<AccountForm />} />
-          <Route path="tai-khoan/:id" element={<AccountForm />} />
+          <Route path="tai-khoan" element={<TaiKhoanList />} />
+          <Route path="tai-khoan/tao" element={<TaiKhoanForm />} />
+          <Route path="tai-khoan/sua/:id" element={<TaiKhoanForm />} />
+          <Route path="tai-khoan/xem/:id" element={<TaiKhoanShow />} />
 
           {/* Quản lý Máy Bay */}
           <Route path="may-bay" element={<MayBayList/>} />
@@ -65,6 +73,21 @@ function App() {
           <Route path="hang-hang-khong" element={<HangHangKhongList />} />
           <Route path="hang-hang-khong/tao" element={<HangHangKhongForm />} />
           <Route path="hang-hang-khong/sua/:id" element={<HangHangKhongForm />} />
+
+          {/* Quản lý Sân bay */}
+          <Route path="san-bay" element={<SanBayList />} />
+          <Route path="san-bay/tao" element={<SanBayForm />} />
+          <Route path="san-bay/sua/:id" element={<SanBayForm />} />
+          
+           {/* Quản lý Giá Vé */}
+          <Route path="gia-ve" element={<GiaVeList />} />
+          <Route path="gia-ve/tao" element={<GiaVeForm />} />
+          <Route path="gia-ve/sua/:id" element={<GiaVeForm />} />
+
+          {/* Quản lý Khuyến Mãi */}
+          <Route path="khuyen-mai" element={<KhuyenMaiList />} />
+          <Route path="khuyen-mai/tao" element={<KhuyenMaiForm />} />
+          <Route path="khuyen-mai/sua/:id" element={<KhuyenMaiForm />} />
         </Route>
 
         {/* ==========================================
