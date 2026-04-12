@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link} from 'react-router-dom';
 import { 
     FaArrowLeft, FaPrint, FaUser, FaPlane,
     FaCreditCard, FaSave, FaInfoCircle
@@ -8,7 +8,6 @@ import { orderApi } from '../../../services/orderApi';
 
 const OrderForm = () => {
     const { id } = useParams();
-    const navigate = useNavigate();
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
