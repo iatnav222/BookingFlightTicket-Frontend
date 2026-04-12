@@ -18,6 +18,12 @@ import MayBayList from './pages/admin/may-bay/MayBayList';
 import MayBayForm from './pages/admin/may-bay/MayBayForm';
 import HangHangKhongList from './pages/admin/hang-bay/HangHangKhongList';
 import HangHangKhongForm from './pages/admin/hang-bay/HangHangKhongForm';
+import SanBayList from './pages/admin/sanbay/SanBayList';
+import SanBayForm from './pages/admin/sanbay/SanBayForm';
+import GiaVeList from './pages/admin/gia-ve/GiaveList';
+import GiaVeForm from './pages/admin/gia-ve/GiaveForm';
+import KhuyenMaiList from './pages/admin/khuyen-mai/KhuyenmaiList';
+import KhuyenMaiForm from './pages/admin/khuyen-mai/KhuyenmaiForm';
 
 // 3. Import Pages - Nhóm User & Auth
 import Home from './pages/user/Home'; 
@@ -57,7 +63,7 @@ function App() {
           <Route path="tai-khoan/tao" element={<TaiKhoanForm />} />
           <Route path="tai-khoan/sua/:id" element={<TaiKhoanForm />} />
           <Route path="tai-khoan/xem/:id" element={<TaiKhoanShow />} />
-          
+
           {/* Quản lý Máy Bay */}
           <Route path="may-bay" element={<MayBayList/>} />
           <Route path="may-bay/tao" element={<MayBayForm />} />
@@ -67,6 +73,21 @@ function App() {
           <Route path="hang-hang-khong" element={<HangHangKhongList />} />
           <Route path="hang-hang-khong/tao" element={<HangHangKhongForm />} />
           <Route path="hang-hang-khong/sua/:id" element={<HangHangKhongForm />} />
+
+          {/* Quản lý Sân bay */}
+          <Route path="san-bay" element={<SanBayList />} />
+          <Route path="san-bay/tao" element={<SanBayForm />} />
+          <Route path="san-bay/sua/:id" element={<SanBayForm />} />
+          
+           {/* Quản lý Giá Vé */}
+          <Route path="gia-ve" element={<GiaVeList />} />
+          <Route path="gia-ve/tao" element={<GiaVeForm />} />
+          <Route path="gia-ve/sua/:id" element={<GiaVeForm />} />
+
+          {/* Quản lý Khuyến Mãi */}
+          <Route path="khuyen-mai" element={<KhuyenMaiList />} />
+          <Route path="khuyen-mai/tao" element={<KhuyenMaiForm />} />
+          <Route path="khuyen-mai/sua/:id" element={<KhuyenMaiForm />} />
         </Route>
 
         {/* ==========================================
