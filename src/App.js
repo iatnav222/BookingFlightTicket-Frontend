@@ -18,9 +18,15 @@ import MayBayForm from './pages/admin/may-bay/MayBayForm';
 import HangHangKhongList from './pages/admin/hang-bay/HangHangKhongList';
 import HangHangKhongForm from './pages/admin/hang-bay/HangHangKhongForm';
 
+import SanBayList from './pages/admin/sanbay/SanBayList';
+import SanBayForm from './pages/admin/sanbay/SanBayForm';
+import GiaVeList from './pages/admin/gia-ve/GiaveList';
+import GiaVeForm from './pages/admin/gia-ve/GiaveForm';
+import KhuyenMaiList from './pages/admin/khuyen-mai/KhuyenmaiList';
+import KhuyenMaiForm from './pages/admin/khuyen-mai/KhuyenmaiForm';
 // 3. Import Pages - Nhóm User & Auth
-import Home from './pages/user/Home'; 
-import Users from './Users'; 
+import Home from './pages/user/Home';
+import Users from './Users';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 
@@ -41,7 +47,7 @@ function App() {
             ========================================== */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminHome />} />
-          
+
           {/* Quản lý Chuyến Bay */}
           <Route path="chuyen-bay" element={<ChuyenBayList />} />
           <Route path="chuyen-bay/tao" element={<ChuyenBayForm />} />
@@ -57,9 +63,24 @@ function App() {
           <Route path="tai-khoan/:id" element={<AccountForm />} />
 
           {/* Quản lý Máy Bay */}
-          <Route path="may-bay" element={<MayBayList/>} />
+          <Route path="may-bay" element={<MayBayList />} />
           <Route path="may-bay/tao" element={<MayBayForm />} />
           <Route path="may-bay/sua/:id" element={<MayBayForm />} />
+
+          {/* Quản lý Sân Bay */}
+          <Route path="san-bay" element={<SanBayList />} />
+          <Route path="san-bay/tao" element={<SanBayForm />} />
+          <Route path="san-bay/sua/:id" element={<SanBayForm />} />
+
+          {/* Quản lý Giá Vé */}
+          <Route path="gia-ve" element={<GiaVeList />} />
+          <Route path="gia-ve/tao" element={<GiaVeForm />} />
+          <Route path="gia-ve/sua/:id" element={<GiaVeForm />} />
+
+          {/* Quản lý Khuyến Mãi */}
+          <Route path="khuyen-mai" element={<KhuyenMaiList />} />
+          <Route path="khuyen-mai/tao" element={<KhuyenMaiForm />} />
+          <Route path="khuyen-mai/sua/:id" element={<KhuyenMaiForm />} />
 
           {/* Quản lý Hãng Hàng Không */}
           <Route path="hang-hang-khong" element={<HangHangKhongList />} />
