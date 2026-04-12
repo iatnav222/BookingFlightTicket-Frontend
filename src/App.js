@@ -20,10 +20,10 @@ import HangHangKhongList from './pages/admin/hang-bay/HangHangKhongList';
 import HangHangKhongForm from './pages/admin/hang-bay/HangHangKhongForm';
 import SanBayList from './pages/admin/sanbay/SanBayList';
 import SanBayForm from './pages/admin/sanbay/SanBayForm';
-import GiaVeList from './pages/admin/gia-ve/GiaveList';
-import GiaVeForm from './pages/admin/gia-ve/GiaveForm';
-import KhuyenMaiList from './pages/admin/khuyen-mai/KhuyenmaiList';
-import KhuyenMaiForm from './pages/admin/khuyen-mai/KhuyenmaiForm';
+import GiaVeList from './pages/admin/gia-ve/GiaVeList';
+import GiaVeForm from './pages/admin/gia-ve/GiaVeForm';
+import KhuyenMaiList from './pages/admin/khuyen-mai/KhuyenMaiList';
+import KhuyenMaiForm from './pages/admin/khuyen-mai/KhuyenMaiForm';
 
 // 3. Import Pages - Nhóm User & Auth
 import Home from './pages/user/Home'; 
