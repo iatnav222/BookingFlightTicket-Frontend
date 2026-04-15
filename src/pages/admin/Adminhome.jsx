@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   FaCalendarAlt, FaCoins, FaShoppingCart, FaPlaneDeparture, FaUsers,
   FaLongArrowAltRight, FaCheckCircle, FaTimesCircle, FaClock
@@ -11,25 +11,147 @@ import {
 } from 'chart.js';
 import { Line, Doughnut } from 'react-chartjs-2';
 
+// IMPORT API (Kiểm tra lại đường dẫn import cho đúng với project của bạn)
+import { orderApi } from '../../services/orderApi';
+import { chuyenBayApi } from '../../services/chuyenBayApi';
+import { taiKhoanApi } from '../../services/taiKhoanApi';
+
 ChartJS.register(
   CategoryScale, LinearScale, PointElement, LineElement, 
   Title, Tooltip, Legend, ArcElement, Filler
 );
 
 const Adminhome = () => {
-  const stats = { doanhThu: 27639999, tongDonHang: 12, chuyenBaySapToi: 0, khachHang: 11 };
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
-  const topRoutes = [
-    { id: 1, di: 'Hồ Chí Minh', den: 'Hà Nội', hang: 'VietJet Air', ve: 3 },
-    { id: 2, di: 'Hà Nội', den: 'Đà Nẵng', hang: 'Vietnam Airlines', ve: 3 },
-    { id: 3, di: 'Đà Nẵng', den: 'Hà Nội', hang: 'Bamboo Airways', ve: 2 },
-  ];
+  // State lưu trữ dữ liệu thống kê
+  const [stats, setStats] = useState({ 
+    doanhThu: 0, 
+    tongDonHang: 0, 
+    chuyenBaySapToi: 0, 
+    khachHang: 0 
+  });
 
-  const recentTransactions = [
-    { id: 'WZWAUFK0', khach: 'abc', tien: 9999999, trangThai: 1 },
-    { id: 'EGG4BPAR', khach: 'abc', tien: 9999999, trangThai: 0 },
-    { id: 'CX1SS36V', khach: 'test', tien: 3240000, trangThai: 1 },
-  ];
+  const [recentTransactions, setRecentTransactions] = useState([]);
+  const [topRoutes, setTopRoutes] = useState([]);
+  
+  // State biểu đồ
+  const [chartData, setChartData] = useState({
+    lineLabels: [],
+    lineData: [],
+    pieData: [0, 0, 0] // Thành công, Chờ xử lý, Đã hủy
+  });
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      setLoading(true);
+      try {
+        // Gọi song song 3 API để lấy dữ liệu (Lấy số lượng lớn để tính thống kê)
+        const [resOrders, resFlights, resAccounts] = await Promise.all([
+          orderApi.getDanhSach({ per_page: 2000 }),
+          chuyenBayApi.getDanhSach({ per_page: 2000 }),
+          taiKhoanApi.getDanhSach({ per_page: 2000 })
+        ]);
+
+        const orders = resOrders.data?.data || resOrders.data || [];
+        const flights = resFlights.data?.data || resFlights.data || [];
+        const accounts = resAccounts.data?.data || resAccounts.data || [];
+
+        // 1. TÍNH TOÁN ĐƠN HÀNG & DOANH THU
+        let totalRev = 0;
+        let countSuccess = 0;
+        let countPending = 0;
+        let countCancel = 0;
+
+        // Khởi tạo mảng doanh thu 6 tháng gần nhất
+        const last6Months = [];
+        const monthData = [];
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date();
+          d.setMonth(d.getMonth() - i);
+          last6Months.push(`T${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`);
+          monthData.push({ month: d.getMonth(), year: d.getFullYear(), total: 0 });
+        }
+
+        orders.forEach(o => {
+          const status = Number(o.trangThai);
+          const amount = Number(o.tongTien) || 0;
+          const orderDate = new Date(o.ngayDat);
+
+          if (status === 1) {
+            totalRev += amount;
+            countSuccess++;
+            // Cộng tiền vào tháng tương ứng trên biểu đồ
+            const monthObj = monthData.find(m => m.month === orderDate.getMonth() && m.year === orderDate.getFullYear());
+            if (monthObj) monthObj.total += amount;
+          } else if (status === 2) {
+            countCancel++;
+          } else {
+            countPending++;
+          }
+        });
+
+        // Lấy 5 giao dịch gần nhất
+        const recent = [...orders]
+          .sort((a, b) => new Date(b.ngayDat) - new Date(a.ngayDat))
+          .slice(0, 5)
+          .map(o => ({
+            id: o.maCodeDonHang || o.maDonHang,
+            khach: o.thongTinLienHe?.ten || o.taikhoan?.hoten || 'Khách vãng lai',
+            tien: o.tongTien,
+            trangThai: Number(o.trangThai),
+            rawId: o.maDonHang // Dùng để navigate
+          }));
+
+        // 2. TÍNH TOÁN CHUYẾN BAY SẮP TỚI
+        const now = new Date();
+        const upcomingFlights = flights.filter(f => new Date(f.ngayGioCatCanh) > now).length;
+
+        // Tạo Top chặng bay (Lấy tạm dữ liệu từ chuyến bay để demo chặng phổ biến)
+        const routesMap = {};
+        flights.forEach(f => {
+            const key = `${f.san_bay_di?.thanhPho}-${f.san_bay_den?.thanhPho}`;
+            if (!routesMap[key]) {
+                routesMap[key] = {
+                    id: f.maChuyenBay,
+                    di: f.san_bay_di?.thanhPho || f.maSanBayDi,
+                    den: f.san_bay_den?.thanhPho || f.maSanBayDen,
+                    hang: f.hang_hang_khong?.tenHang || 'N/A',
+                    count: 0
+                };
+            }
+            routesMap[key].count += 1; // Giả lập đếm số chuyến bay làm độ phổ biến
+        });
+        const topR = Object.values(routesMap).sort((a,b) => b.count - a.count).slice(0, 5);
+
+        // 3. TÍNH TOÁN KHÁCH HÀNG (Tài khoản User)
+        const customers = accounts.filter(a => a.quyen === 'user').length;
+
+        // --- CẬP NHẬT STATE TỔNG ---
+        setStats({
+          doanhThu: totalRev,
+          tongDonHang: orders.length,
+          chuyenBaySapToi: upcomingFlights,
+          khachHang: customers
+        });
+        setRecentTransactions(recent);
+        setTopRoutes(topR);
+        setChartData({
+          lineLabels: last6Months,
+          lineData: monthData.map(m => m.total),
+          pieData: [countSuccess, countPending, countCancel]
+        });
+
+      } catch (error) {
+        console.error("Lỗi lấy dữ liệu Dashboard:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   const renderStatusIcon = (status) => {
     switch(status) {
@@ -39,12 +161,13 @@ const Adminhome = () => {
     }
   };
 
-  const lineChartData = {
-    labels: ['T05/2025', 'T07/2025', 'T09/2025', 'T11/2025', 'T01/2026', 'T03/2026'],
+  // Cấu hình Biểu đồ Đường
+  const lineChartData = useMemo(() => ({
+    labels: chartData.lineLabels,
     datasets: [
       {
         label: 'Doanh thu',
-        data: [0, 0, 0, 0, 17500000, 0, 10000000, 0],
+        data: chartData.lineData,
         borderColor: '#4e73df', 
         backgroundColor: 'rgba(78, 115, 223, 0.05)',
         borderWidth: 2,
@@ -52,13 +175,13 @@ const Adminhome = () => {
         pointBorderColor: '#fff',
         pointHoverBackgroundColor: '#fff',
         pointHoverBorderColor: '#4e73df',
-        pointRadius: 3,
-        pointHoverRadius: 3,
+        pointRadius: 4,
+        pointHoverRadius: 6,
         fill: true,
-        tension: 0.3, // Độ cong giống biểu đồ gốc
+        tension: 0.3,
       },
     ],
-  };
+  }), [chartData]);
 
   const lineChartOptions = {
     responsive: true,
@@ -71,31 +194,35 @@ const Adminhome = () => {
       },
       x: { 
         grid: { display: false, drawBorder: false },
-        ticks: { maxTicksLimit: 7 }
       }
     },
     plugins: { legend: { display: false } }
   };
 
-  const doughnutChartData = {
+  // Cấu hình Biểu đồ Tròn
+  const doughnutChartData = useMemo(() => ({
     labels: ['Thành công', 'Chờ xử lý', 'Đã hủy'],
     datasets: [
       {
-        data: [60, 25, 15],
+        data: chartData.pieData,
         backgroundColor: ['#1cc88a', '#f6c23e', '#858796'],
         hoverBackgroundColor: ['#17a673', '#dda20a', '#60616f'],
         borderWidth: 0,
         hoverOffset: 4
       },
     ],
-  };
+  }), [chartData]);
 
   const doughnutChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: '80%', // Vòng cung mỏng giống bản Blade
+    cutout: '75%', 
     plugins: { legend: { display: false } }
   };
+
+  if (loading) {
+    return <div className="p-10 text-center font-bold text-gray-500">Đang tải dữ liệu tổng quan hệ thống...</div>;
+  }
 
   return (
     <div className="font-sans text-gray-800 antialiased">
@@ -104,73 +231,63 @@ const Adminhome = () => {
       <div className="flex items-center justify-between pb-3 mb-6 border-b border-gray-200">
         <h2 className="text-[1.75rem] font-bold text-[#4e73df] m-0">Tổng quan hệ thống</h2>
         <span className="flex items-center gap-1 text-gray-500 text-sm">
-          <FaCalendarAlt className="mr-1" /> 04/04/2026
+          <FaCalendarAlt className="mr-1" /> {new Date().toLocaleDateString('vi-VN')}
         </span>
       </div>
 
-      {/* KPI Cards */}
+      {/* KPI Cards (CÓ THỂ CLICK ĐỂ CHUYỂN TRANG) */}
       <div className="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
         
-        {/* Doanh Thu */}
-        <div className="bg-white rounded-[0.35rem] shadow-[0_0.15rem_1.75rem_0_rgba(58,59,69,0.15)] border-l-[4px] border-l-[#1cc88a] py-2 transition-transform hover:-translate-y-1 cursor-pointer">
+        {/* Doanh Thu -> Chuyển sang Quản lý Doanh thu */}
+        <div onClick={() => navigate('/admin/doanh-thu')} className="bg-white rounded-[0.35rem] shadow-[0_0.15rem_1.75rem_0_rgba(58,59,69,0.15)] border-l-[4px] border-l-[#1cc88a] py-2 transition-transform hover:-translate-y-1 cursor-pointer hover:shadow-[0_0.5rem_2rem_0_rgba(58,59,69,0.25)]">
           <div className="px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="mr-2">
                 <div className="text-[11px] font-bold text-[#1cc88a] uppercase mb-1">Doanh Thu (Thực)</div>
-                {/* Giảm size text xuống text-xl (h5) để vừa 1 dòng */}
                 <div className="text-xl font-bold text-[#5a5c69]">
                   {stats.doanhThu.toLocaleString('vi-VN')} VND
                 </div>
               </div>
-              {/* Giữ icon cố định size 2rem, không bị thu nhỏ */}
-              <div className="shrink-0">
-                <FaCoins className="text-[2rem] text-gray-300 opacity-100" />
-              </div>
+              <div className="shrink-0"><FaCoins className="text-[2rem] text-gray-300 opacity-100" /></div>
             </div>
           </div>
         </div>
 
-        {/* Tổng Đơn Hàng */}
-        <div className="bg-white rounded-[0.35rem] shadow-[0_0.15rem_1.75rem_0_rgba(58,59,69,0.15)] border-l-[4px] border-l-[#4e73df] py-2 transition-transform hover:-translate-y-1 cursor-pointer">
+        {/* Tổng Đơn Hàng -> Chuyển sang Quản lý Đơn hàng */}
+        <div onClick={() => navigate('/admin/don-hang')} className="bg-white rounded-[0.35rem] shadow-[0_0.15rem_1.75rem_0_rgba(58,59,69,0.15)] border-l-[4px] border-l-[#4e73df] py-2 transition-transform hover:-translate-y-1 cursor-pointer hover:shadow-[0_0.5rem_2rem_0_rgba(58,59,69,0.25)]">
           <div className="px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="mr-2">
                 <div className="text-[11px] font-bold text-[#4e73df] uppercase mb-1">Tổng Đơn Hàng</div>
                 <div className="text-xl font-bold text-[#5a5c69]">{stats.tongDonHang}</div>
               </div>
-              <div className="shrink-0">
-                <FaShoppingCart className="text-[2rem] text-gray-300 opacity-100" />
-              </div>
+              <div className="shrink-0"><FaShoppingCart className="text-[2rem] text-gray-300 opacity-100" /></div>
             </div>
           </div>
         </div>
 
-        {/* Chuyến Bay Sắp Tới */}
-        <div className="bg-white rounded-[0.35rem] shadow-[0_0.15rem_1.75rem_0_rgba(58,59,69,0.15)] border-l-[4px] border-l-[#36b9cc] py-2 transition-transform hover:-translate-y-1 cursor-pointer">
+        {/* Chuyến Bay Sắp Tới -> Chuyển sang Quản lý Chuyến bay */}
+        <div onClick={() => navigate('/admin/chuyen-bay')} className="bg-white rounded-[0.35rem] shadow-[0_0.15rem_1.75rem_0_rgba(58,59,69,0.15)] border-l-[4px] border-l-[#36b9cc] py-2 transition-transform hover:-translate-y-1 cursor-pointer hover:shadow-[0_0.5rem_2rem_0_rgba(58,59,69,0.25)]">
           <div className="px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="mr-2">
                 <div className="text-[11px] font-bold text-[#36b9cc] uppercase mb-1">Chuyến Bay Sắp Tới</div>
                 <div className="text-xl font-bold text-[#5a5c69]">{stats.chuyenBaySapToi}</div>
               </div>
-              <div className="shrink-0">
-                <FaPlaneDeparture className="text-[2rem] text-gray-300 opacity-100" />
-              </div>
+              <div className="shrink-0"><FaPlaneDeparture className="text-[2rem] text-gray-300 opacity-100" /></div>
             </div>
           </div>
         </div>
 
-        {/* Khách Hàng */}
-        <div className="bg-white rounded-[0.35rem] shadow-[0_0.15rem_1.75rem_0_rgba(58,59,69,0.15)] border-l-[4px] border-l-[#f6c23e] py-2 transition-transform hover:-translate-y-1 cursor-pointer">
+        {/* Khách Hàng -> Chuyển sang Quản lý Tài khoản */}
+        <div onClick={() => navigate('/admin/tai-khoan')} className="bg-white rounded-[0.35rem] shadow-[0_0.15rem_1.75rem_0_rgba(58,59,69,0.15)] border-l-[4px] border-l-[#f6c23e] py-2 transition-transform hover:-translate-y-1 cursor-pointer hover:shadow-[0_0.5rem_2rem_0_rgba(58,59,69,0.25)]">
           <div className="px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="mr-2">
                 <div className="text-[11px] font-bold text-[#f6c23e] uppercase mb-1">Khách Hàng</div>
                 <div className="text-xl font-bold text-[#5a5c69]">{stats.khachHang}</div>
               </div>
-              <div className="shrink-0">
-                <FaUsers className="text-[2rem] text-gray-300 opacity-100" />
-              </div>
+              <div className="shrink-0"><FaUsers className="text-[2rem] text-gray-300 opacity-100" /></div>
             </div>
           </div>
         </div>
@@ -182,7 +299,7 @@ const Adminhome = () => {
         {/* Line Chart */}
         <div className="bg-white rounded-[0.35rem] shadow-[0_0.15rem_1.75rem_0_rgba(58,59,69,0.15)] lg:col-span-2 flex flex-col">
           <div className="px-4 py-3 border-b border-gray-200 bg-white rounded-t-[0.35rem]">
-            <h6 className="font-bold text-[#4e73df] m-0 text-sm">Biểu Đồ Doanh Thu (12 Tháng)</h6>
+            <h6 className="font-bold text-[#4e73df] m-0 text-sm">Biểu Đồ Doanh Thu (6 Tháng Qua)</h6>
           </div>
           <div className="p-4 flex-1">
             <div className="h-[320px] w-full">
@@ -194,7 +311,7 @@ const Adminhome = () => {
         {/* Doughnut Chart */}
         <div className="bg-white rounded-[0.35rem] shadow-[0_0.15rem_1.75rem_0_rgba(58,59,69,0.15)] flex flex-col">
           <div className="px-4 py-3 border-b border-gray-200 bg-white rounded-t-[0.35rem]">
-            <h6 className="font-bold text-[#4e73df] m-0 text-sm">Tỷ Lệ Trạng Thái Đơn</h6>
+            <h6 className="font-bold text-[#4e73df] m-0 text-sm">Tỷ Lệ Trạng Thái Đơn Hàng</h6>
           </div>
           <div className="p-4 flex-1 flex flex-col">
             <div className="h-[250px] w-full flex justify-center pt-4 pb-2">
@@ -215,25 +332,29 @@ const Adminhome = () => {
         {/* Bảng Top Chặng Bay */}
         <div className="bg-white rounded-[0.35rem] shadow-[0_0.15rem_1.75rem_0_rgba(58,59,69,0.15)]">
           <div className="px-4 py-3 border-b border-gray-200 bg-white rounded-t-[0.35rem]">
-            <h6 className="font-bold text-[#4e73df] m-0 text-sm">Top Chặng Bay Bán Chạy</h6>
+            <h6 className="font-bold text-[#4e73df] m-0 text-sm">Top Chặng Bay Phổ Biến</h6>
           </div>
           <div className="p-4">
-            {topRoutes.map((route, index) => (
-              <React.Fragment key={route.id}>
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-gray-800 text-sm">{route.di}</span>
-                      <FaLongArrowAltRight className="text-gray-400 text-xs mx-1" />
-                      <span className="font-bold text-[#4e73df] text-sm">{route.den}</span>
+            {topRoutes.length === 0 ? (
+                <p className="text-center text-gray-500 py-3">Chưa có dữ liệu chuyến bay.</p>
+            ) : (
+                topRoutes.map((route, index) => (
+                <React.Fragment key={route.id}>
+                    <div className="flex items-center justify-between mb-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition" onClick={() => navigate(`/admin/chuyen-bay/sua/${route.id}`)}>
+                    <div>
+                        <div className="flex items-center gap-2">
+                        <span className="font-bold text-gray-800 text-sm">{route.di}</span>
+                        <FaLongArrowAltRight className="text-gray-400 text-xs mx-1" />
+                        <span className="font-bold text-[#4e73df] text-sm">{route.den}</span>
+                        </div>
+                        <div className="text-[13px] text-gray-500 mt-0.5">{route.hang}</div>
                     </div>
-                    <div className="text-[13px] text-gray-500 mt-0.5">{route.hang}</div>
-                  </div>
-                  <span className="px-3 py-1 text-xs font-semibold text-white bg-[#e74a3b] rounded-full">{route.ve} vé</span>
-                </div>
-                {index !== topRoutes.length - 1 && <hr className="my-3 border-gray-200 opacity-100" />}
-              </React.Fragment>
-            ))}
+                    <span className="px-3 py-1 text-xs font-semibold text-white bg-[#e74a3b] rounded-full">{route.count} chuyến</span>
+                    </div>
+                    {index !== topRoutes.length - 1 && <hr className="my-2 border-gray-200 opacity-100" />}
+                </React.Fragment>
+                ))
+            )}
           </div>
         </div>
 
@@ -249,23 +370,28 @@ const Adminhome = () => {
             <table className="w-full text-left align-middle">
               <thead className="bg-[#f8f9fa] border-b border-gray-200 text-gray-600">
                 <tr>
-                  <th className="px-4 py-2.5 text-sm font-semibold">Mã</th>
-                  <th className="px-4 py-2.5 text-sm font-semibold">Khách</th>
+                  <th className="px-4 py-2.5 text-sm font-semibold">Mã Đơn</th>
+                  <th className="px-4 py-2.5 text-sm font-semibold">Khách Hàng</th>
                   <th className="px-4 py-2.5 text-sm font-semibold">Tiền (VND)</th>
-                  <th className="px-4 py-2.5 text-sm font-semibold">TT</th>
+                  <th className="px-4 py-2.5 text-sm font-semibold text-center">TT</th>
                 </tr>
               </thead>
               <tbody>
-                {recentTransactions.map((tx) => (
-                  <tr key={tx.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 text-[13px] font-bold text-[#4e73df]">#{tx.id}</td>
-                    <td className="px-4 py-3 text-[13px] text-gray-700">{tx.khach}</td>
-                    <td className="px-4 py-3 text-[13px] font-bold text-[#e74a3b]">{new Intl.NumberFormat('vi-VN').format(tx.tien)}</td>
-                    <td className="px-4 py-3">
-                      {renderStatusIcon(tx.trangThai)}
-                    </td>
-                  </tr>
-                ))}
+                {recentTransactions.length === 0 ? (
+                    <tr><td colSpan="4" className="text-center py-4 text-gray-500">Chưa có giao dịch.</td></tr>
+                ) : (
+                    recentTransactions.map((tx) => (
+                    // Click vào dòng sẽ dẫn tới chi tiết đơn hàng
+                    <tr key={tx.id} onClick={() => navigate(`/admin/don-hang/${tx.rawId}`)} className="border-b border-gray-100 hover:bg-blue-50 transition-colors cursor-pointer">
+                        <td className="px-4 py-3 text-[13px] font-bold text-[#4e73df]">#{tx.id}</td>
+                        <td className="px-4 py-3 text-[13px] text-gray-700">{tx.khach}</td>
+                        <td className="px-4 py-3 text-[13px] font-bold text-[#e74a3b]">{new Intl.NumberFormat('vi-VN').format(tx.tien)}</td>
+                        <td className="px-4 py-3 text-center">
+                        {renderStatusIcon(tx.trangThai)}
+                        </td>
+                    </tr>
+                    ))
+                )}
               </tbody>
             </table>
           </div>

@@ -1,16 +1,14 @@
-import axios from 'axios';
-
-const API_URL = 'https://bookingflightticket-backend-new.onrender.com/api/admin';
-
+import api from '../api';
 export const sanBayApi = {
-    getDanhSach: (params) => axios.get(`${API_URL}/san-bay`, { params }),
-    getChiTiet: (id) => axios.get(`${API_URL}/san-bay/${id}`),
-    themSanBay: (data) => axios.post(`${API_URL}/san-bay`, data),
-    capNhatSanBay: (id, data) => axios.post(`${API_URL}/san-bay/${id}`, data, {
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
+    // Admin
+    getDanhSach: (params) => api.get('/api/admin/san-bay', { params }),
+    getChiTiet: (id) => api.get(`/api/admin/san-bay/${id}`),
+    themSanBay: (data) => api.post('/api/admin/san-bay', data),
+    capNhatSanBay: (id, data) => api.post(`/api/admin/san-bay/${id}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
     }),
+    xoaSanBay: (id) => api.delete(`/api/admin/san-bay/${id}`),
 
-    xoaSanBay: (id) => axios.delete(`${API_URL}/san-bay/${id}`),
+    // Client
+    getDanhSachClient: (params) => api.get('/api/client/san-bay', { params })
 };
