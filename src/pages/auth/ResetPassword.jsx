@@ -7,7 +7,7 @@ const ResetPassword = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token'); // Tự động bắt param ?token=... trên URL
   const [formData, setFormData] = useState({ email: '', password: '', password_confirmation: '' });
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorMsg] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
