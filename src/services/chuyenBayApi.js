@@ -1,6 +1,7 @@
 import api from '../api';
 
 export const chuyenBayApi = {
+    // Admin
     // 1. Lấy danh sách chuyến bay
     getDanhSach: async (filters = {}) => {
         const response = await api.get('/api/admin/chuyen-bay', { params: filters });
@@ -46,6 +47,15 @@ export const chuyenBayApi = {
     getSanBay: async () => {
         const response = await api.get('/api/admin/san-bay');
         return response.data;
+    },
+    // Client
+    getDanhSachClient: (params) => {
+        return api.get('/api/client/chuyen-bay', { params });
+    },
+    
+    // Lấy chi tiết chuyến bay (Client)
+    getChiTietClient: (id) => {
+        return api.get(`/api/client/chuyen-bay/${id}`);
     }
 };
 

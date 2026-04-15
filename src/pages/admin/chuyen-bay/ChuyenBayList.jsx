@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { 
     FaPlus, FaSearch, FaSyncAlt, FaPlane, FaLongArrowAltRight, 
@@ -13,10 +13,10 @@ const ChuyenBayList = () => {
     const [loading, setLoading] = useState(false);
     const [filters, setFilters] = useState({ maHang: '', ngayBay: '', search: '' });
     
-    // 2. STATE PHÂN TRANG FRONTEND
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10; // Đổi số này nếu bạn muốn hiển thị nhiều/ít hơn trên 1 trang
+    const itemsPerPage = 10; 
 
+    // Lấy danh sách hãng hàng không
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -25,56 +25,50 @@ const ChuyenBayList = () => {
             } catch (err) { console.error(err); }
         };
         fetchCategories();
-        fetchChuyenBays({});
     }, []);
 
-    const fetchChuyenBays = async (queryFilters) => {
+    // Tự động lấy danh sách chuyến bay khi thay đổi filters
+    const fetchChuyenBays = useCallback(async () => {
         setLoading(true);
         try {
             const activeFilters = Object.fromEntries(
-                Object.entries(queryFilters).filter(([_, v]) => v !== '')
+                Object.entries(filters).filter(([_, v]) => v !== '')
             );
             
-            // Backend vẫn trả về toàn bộ dữ liệu bình thường
             const response = await chuyenBayApi.getDanhSach(activeFilters);
             const dataList = response.data || [];
             
-            setAllChuyenBays(dataList); // Lưu tất cả vào state
-            setCurrentPage(1); // Reset về trang 1 mỗi khi lấy data mới (như khi tìm kiếm)
-            
+            setAllChuyenBays(dataList);
+            setCurrentPage(1); 
         } catch (error) { 
             console.error(error); 
         } finally { 
             setLoading(false); 
         }
-    };
+    }, [filters]);
+
+    useEffect(() => {
+        fetchChuyenBays();
+    }, [fetchChuyenBays]);
 
     const handleFilterChange = (e) => setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }));
-    
-    const handleSearch = () => fetchChuyenBays(filters);
-    const handleKeyDown = (e) => { if (e.key === 'Enter') handleSearch(); };
 
     const resetFilters = () => {
-        const emptyFilters = { maHang: '', ngayBay: '', search: '' };
-        setFilters(emptyFilters);
-        fetchChuyenBays(emptyFilters); 
+        setFilters({ maHang: '', ngayBay: '', search: '' });
     };
 
     const handleDelete = async (id) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa chuyến bay này không? Dữ liệu vé đã đặt sẽ bị ảnh hưởng!')) {
             try {
                 await chuyenBayApi.xoaChuyenBay(id);
-                // Sau khi xóa thành công, gọi lại API để làm mới danh sách tổng
-                fetchChuyenBays(filters);
+                fetchChuyenBays();
             } catch (error) { alert(error.response?.data?.message || "Không thể xóa."); }
         }
     };
 
-    // 3. LOGIC CẮT MẢNG DỮ LIỆU ĐỂ HIỂN THỊ CHO TRANG HIỆN TẠI
     const totalPages = Math.ceil(allChuyenBays.length / itemsPerPage);
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    // Mảng này chứa đúng 10 chuyến bay của trang hiện tại để đem đi render
     const currentChuyenBays = allChuyenBays.slice(indexOfFirstItem, indexOfLastItem);
 
     const handlePageChange = (newPage) => {
@@ -84,7 +78,7 @@ const ChuyenBayList = () => {
     };
 
     return (
-        <div className="container-fluid px-4 mt-4 font-['Nunito',-apple-system,BlinkMacSystemFont,'Segoe_UI',Roboto,'Helvetica_Neue',Arial,sans-serif] text-[#5a5c69]">
+        <div className="container-fluid px-4 mt-4 font-sans text-[#5a5c69]">
             <div className="bg-white rounded shadow-[0_0.15rem_1.75rem_0_rgba(58,59,69,0.15)] mb-4 border-none">
                 <div className="px-4 py-3 border-b border-gray-100 flex flex-wrap items-center justify-between gap-2 bg-[#f8f9fc]">
                     <h6 className="m-0 font-bold text-[#4e73df] text-lg">Danh Sách Chuyến Bay</h6>
@@ -94,7 +88,6 @@ const ChuyenBayList = () => {
                 </div>
 
                 <div className="p-4">
-                    {/* Toolbar */}
                     <div className="mb-4 bg-[#f8f9fc] p-4 rounded border border-gray-200 flex flex-wrap gap-3 items-center">
                         <select name="maHang" value={filters.maHang} onChange={handleFilterChange} className="text-sm p-2 border rounded border-gray-300 focus:ring-1 focus:ring-[#4e73df] outline-none bg-white">
                             <option value="">-- Tất cả hãng --</option>
@@ -102,15 +95,14 @@ const ChuyenBayList = () => {
                         </select>
                         <input type="date" name="ngayBay" value={filters.ngayBay} onChange={handleFilterChange} className="text-sm p-2 border rounded border-gray-300 focus:ring-1 focus:ring-[#4e73df] outline-none" />
                         <div className="flex flex-1 min-w-[200px]">
-                            <input type="text" name="search" value={filters.search} onChange={handleFilterChange} onKeyDown={handleKeyDown} placeholder="Nhập mã chuyến bay..." className="w-full text-sm p-2 border border-r-0 border-gray-300 rounded-l focus:outline-none" />
-                            <button onClick={handleSearch} className="px-4 bg-[#4e73df] text-white rounded-r hover:bg-[#2e59d9] transition"><FaSearch /></button>
+                            <input type="text" name="search" value={filters.search} onChange={handleFilterChange} placeholder="Nhập mã chuyến bay..." className="w-full text-sm p-2 border border-r-0 border-gray-300 rounded-l focus:outline-none" />
+                            <button className="px-4 bg-[#4e73df] text-white rounded-r hover:bg-[#2e59d9] transition"><FaSearch /></button>
                         </div>
                         <button onClick={resetFilters} className="px-3 py-2 text-sm text-white bg-[#858796] rounded hover:bg-[#717384] transition"><FaSyncAlt className="inline mr-1"/> Làm mới</button>
                     </div>
 
                     <div className="overflow-x-auto">
                         <table className="w-full text-left align-middle border-collapse border border-gray-200">
-                            {/* Header: Cỡ chữ 16px, cấm rớt dòng (whitespace-nowrap) để giữ form bảng */}
                             <thead className="bg-[#5a5c69] text-white text-center text-[16px] whitespace-nowrap">
                                 <tr>
                                     <th className="p-4 border font-semibold">Mã CB</th>
@@ -136,18 +128,13 @@ const ChuyenBayList = () => {
 
                                         return (
                                             <tr key={cb.maChuyenBay} className="hover:bg-gray-50 border-b transition">
-                                                {/* Mã CB: 18px, nổi bật và chống rớt dòng */}
                                                 <td className="p-4 text-center font-bold text-[#4e73df] text-[18px] whitespace-nowrap">
                                                     #{cb.maChuyenBay}
                                                 </td>
-                                                
-                                                {/* Hãng / Máy bay: Tên hãng 16px, Tên máy bay 14px */}
                                                 <td className="p-4 whitespace-nowrap">
                                                     <div className="font-bold text-gray-900 text-[16px]">{cb.hang_hang_khong?.tenHang || 'N/A'}</div>
                                                     <div className="text-[14px] text-gray-500 mt-1"><FaPlane className="inline mr-1.5"/> {cb.may_bay?.tenMayBay}</div>
                                                 </td>
-                                                
-                                                {/* Hành trình: Thẻ tên sân bay to lên 14px (thay vì 12px như cũ) */}
                                                 <td className="p-4 text-center whitespace-nowrap">
                                                     <div className="flex items-center justify-center gap-2 mb-2">
                                                         <span className="text-[14px] bg-[#36b9cc] text-white px-2.5 py-1 rounded font-bold">{cb.san_bay_di?.maCode}</span>
@@ -156,14 +143,10 @@ const ChuyenBayList = () => {
                                                     </div>
                                                     <div className="text-[14px] text-gray-600 italic">{cb.san_bay_di?.thanhPho} - {cb.san_bay_den?.thanhPho}</div>
                                                 </td>
-                                                
-                                                {/* Thời gian: To lên 15px và cấm rớt dòng ngày tháng */}
                                                 <td className="p-4 text-[15px] leading-loose whitespace-nowrap">
                                                     <div><FaPlaneDeparture className="inline text-[#1cc88a] mr-2"/> {new Date(cb.ngayGioCatCanh).toLocaleString('vi-VN')}</div>
                                                     <div><FaPlaneArrival className="inline text-[#e74a3b] mr-2"/> {new Date(cb.ngayGioHaCanh).toLocaleString('vi-VN')}</div>
                                                 </td>
-                                                
-                                                {/* Ghế: Thanh trạng thái dày hơn (h-7), chữ bên trong to lên 14px */}
                                                 <td className="p-4">
                                                     <div className="w-full bg-gray-200 rounded-full h-7 relative overflow-hidden border border-gray-300">
                                                         <div className={`${color} h-full text-[14px] text-white font-bold flex items-center justify-center`} style={{ width: `${percent}%` }}>
@@ -171,8 +154,6 @@ const ChuyenBayList = () => {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                
-                                                {/* Trạng thái: Chữ to lên 13px, khoảng cách đệm (padding) rộng ra */}
                                                 <td className="p-4 text-center whitespace-nowrap">
                                                     {cb.trangThai ? (
                                                         <span className="px-3.5 py-1.5 text-[13px] font-bold bg-green-100 text-green-700 rounded-full border border-green-200 shadow-sm">HOẠT ĐỘNG</span>
@@ -180,8 +161,6 @@ const ChuyenBayList = () => {
                                                         <span className="px-3.5 py-1.5 text-[13px] font-bold bg-gray-100 text-gray-600 rounded-full border border-gray-200 shadow-sm">TẠM HOÃN</span>
                                                     )}
                                                 </td>
-                                                
-                                                {/* Hành động */}
                                                 <td className="p-4 whitespace-nowrap">
                                                     <div className="flex justify-center gap-2">
                                                         <Link to={`/admin/chuyen-bay/sua/${cb.maChuyenBay}`} className="w-10 h-10 bg-[#f6c23e] hover:bg-[#dda20a] text-white rounded flex items-center justify-center transition shadow-sm text-[18px]"><FaEdit/></Link>
@@ -196,7 +175,6 @@ const ChuyenBayList = () => {
                         </table>
                     </div>
 
-                    {/* Controls Phân Trang */}
                     {totalPages > 1 && (
                         <div className="flex flex-col sm:flex-row justify-between items-center mt-4 pt-4 border-t border-gray-200">
                             <div className="text-sm text-gray-600 mb-2 sm:mb-0">

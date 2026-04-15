@@ -20,5 +20,9 @@ export const hangHangKhongApi = {
     },
     xoaHang(id) {
         return api.delete(`/api/admin/hang-hang-khong/${id}`);
+    },
+    // Client
+    getDanhSachClient: (params) => {
+        return api.get('/api/client/hang-hang-khong', { params });
     }
 };

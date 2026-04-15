@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { FaPlus, FaSearch, FaSyncAlt, FaEdit, FaTrash, FaCheckCircle, FaBan } from 'react-icons/fa';
-import { hangHangKhongApi } from '../../../services/hangHangKhongApi'; // Đường dẫn tuỳ project của bạn
+import { hangHangKhongApi } from '../../../services/hangHangKhongApi'; 
 
 const BACKEND_URL = 'https://bookingflightticket-backend-new.onrender.com/';
 
@@ -10,30 +10,26 @@ const HangHangKhongList = () => {
     const [loading, setLoading] = useState(false);
     const [keyword, setKeyword] = useState('');
 
-    const fetchAirlines = async (searchKeyword = '') => {
+    // Đã bọc hàm fetch trong useCallback để theo dõi biến keyword
+    const fetchAirlines = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await hangHangKhongApi.getDanhSach({ keyword: searchKeyword });
-            setAirlines(res.data.data || res.data); // Tuỳ cấu trúc trả về của API
+            const res = await hangHangKhongApi.getDanhSach({ keyword });
+            setAirlines(res.data.data || res.data); 
         } catch (error) {
             console.error("Lỗi lấy danh sách:", error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [keyword]);
 
+    // Tự động gọi lại API mỗi khi keyword thay đổi (gõ phím)
     useEffect(() => {
         fetchAirlines();
-    }, []);
-
-    const handleSearch = (e) => {
-        e.preventDefault();
-        fetchAirlines(keyword);
-    };
+    }, [fetchAirlines]);
 
     const resetSearch = () => {
         setKeyword('');
-        fetchAirlines('');
     };
 
     const handleDelete = async (id, ten) => {
@@ -41,7 +37,7 @@ const HangHangKhongList = () => {
             try {
                 await hangHangKhongApi.xoaHang(id);
                 alert('Xóa thành công!');
-                fetchAirlines(keyword); // Load lại danh sách
+                fetchAirlines(); 
             } catch (error) {
                 alert("Không thể xóa hãng này.");
             }
@@ -51,7 +47,6 @@ const HangHangKhongList = () => {
     return (
         <div className="container-fluid px-4 mt-4 font-sans text-gray-800">
             <div className="bg-white rounded shadow-sm mb-4 border-none">
-                {/* Header */}
                 <div className="px-4 py-3 border-b border-gray-100 flex flex-wrap items-center justify-between gap-2 bg-[#f8f9fc]">
                     <h5 className="m-0 font-bold text-[#4e73df] text-lg">Danh Sách Hãng Hàng Không</h5>
                     <Link to="/admin/hang-hang-khong/tao" className="flex items-center px-3 py-1.5 text-sm font-semibold text-white bg-[#1cc88a] rounded hover:bg-[#17a673] transition shadow-sm">
@@ -60,9 +55,8 @@ const HangHangKhongList = () => {
                 </div>
 
                 <div className="p-4">
-                    {/* Toolbar Tìm Kiếm */}
                     <div className="mb-4 flex justify-end">
-                        <form onSubmit={handleSearch} className="flex gap-2">
+                        <form onSubmit={(e) => e.preventDefault()} className="flex gap-2">
                             <input 
                                 type="text" 
                                 placeholder="Tìm tên hãng, mã code..." 
@@ -81,7 +75,6 @@ const HangHangKhongList = () => {
                         </form>
                     </div>
 
-                    {/* Bảng dữ liệu */}
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse border border-gray-200">
                             <thead className="bg-[#5a5c69] text-white text-center text-sm">
