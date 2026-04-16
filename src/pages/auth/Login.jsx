@@ -29,17 +29,21 @@ const Login = () => {
         password: formData.password
       });
 
-      // Xử lý khi thành công (Lưu token vào localStorage tuỳ thuộc vào Backend trả về)
-      if (response.token) {
-         localStorage.setItem('token', response.token);
-         localStorage.setItem('user', JSON.stringify(response.user));
+      // Xử lý khi thành công dựa theo cấu trúc JSON mới
+      if (response.access_token) {
+         localStorage.setItem('token', response.access_token);
+         localStorage.setItem('user', JSON.stringify(response.data));
       }
       
-      setSuccessMsg('Đăng nhập thành công! Đang chuyển hướng...');
+      // Sử dụng message từ API nếu có, không thì dùng mặc định
+      setSuccessMsg(response.message || 'Đăng nhập thành công! Đang chuyển hướng...');
       
-      // Phân quyền chuyển hướng (giả sử có thuộc tính role trong response)
+      // Phân quyền chuyển hướng
       setTimeout(() => {
-        if (response.user && response.user.quyen === 'admin') {
+        // Kiểm tra quyền từ response.quyen hoặc response.data.quyen
+        const userRole = response.quyen || (response.data && response.data.quyen);
+        
+        if (userRole === 'admin') {
            navigate('/admin');
         } else {
            navigate('/');

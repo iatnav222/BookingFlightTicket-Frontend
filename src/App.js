@@ -33,7 +33,7 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
-//import ProtectedRoute from './components/admin/ProtectedRoute';
+import ProtectedRoute from './components/admin/ProtectedRoute';
 
 function App() {
   return (
@@ -53,7 +53,7 @@ function App() {
         {/* ==========================================
             NHÓM ADMIN (Hiển thị Sidebar Admin) 
             ========================================== */}
-        {/* <Route element={<ProtectedRoute allowedRoles={['admin']} />}> */}
+        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminHome />} />
           
@@ -100,7 +100,7 @@ function App() {
             {/* Quản lý Doanh Thu */}
             <Route path="doanh-thu" element={<DoanhThu />} />
           </Route>            
-        {/* </Route> */}
+        </Route>
 
         {/* ==========================================
             NHÓM AUTH (Không hiển thị Header/Footer) 
