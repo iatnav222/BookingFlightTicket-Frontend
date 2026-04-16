@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   FaUserShield, FaHome, FaMapMarkerAlt, FaFlag, FaPlane, FaCalendarAlt, 
   FaFileInvoiceDollar, FaMoneyBillWave, FaPercent, FaUsersCog, FaChartLine, 
@@ -8,7 +8,7 @@ import {
 
 const Adminlayout = () => {
   const location = useLocation();
-
+  const navigate = useNavigate();
   // Component con giúp tự động thêm class Active cho Menu
   const NavLink = ({ to, icon: Icon, children }) => {
     const active = location.pathname === to;
@@ -21,6 +21,11 @@ const Adminlayout = () => {
         <span className="whitespace-normal leading-tight">{children}</span>
       </Link>
     );
+  };
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
   };
 
   return (
@@ -68,7 +73,10 @@ const Adminlayout = () => {
           <Link to="/" className="flex items-center justify-center py-[12px] px-[20px] text-white bg-[#17a2b8] hover:bg-[#138496] hover:pl-[25px] transition-all duration-300 border-b border-black/10 no-underline">
             <FaGlobeAsia className="mr-2" /> Về Trang Khách Hàng
           </Link>
-          <button className="flex items-center justify-center w-full py-[15px] px-[20px] text-white bg-[#dc3545] hover:bg-[#bb2d3b] transition-all duration-300 no-underline border-none cursor-pointer">
+          <button 
+            onClick={handleLogout} 
+            className="flex items-center justify-center w-full py-[15px] px-[20px] text-white bg-[#dc3545] hover:bg-[#bb2d3b] transition-all duration-300 no-underline border-none cursor-pointer"
+          >
             <FaSignOutAlt className="mr-2" /> Đăng Xuất
           </button>
         </div>
