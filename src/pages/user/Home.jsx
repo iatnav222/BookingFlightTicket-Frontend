@@ -304,8 +304,9 @@ const Home = () => {
                       <span className="text-[18px] font-medium text-[#007aff]">
                         {(cb.gia_thap_nhat || 0).toLocaleString('vi-VN')} VND
                       </span>
-                      {/* Chữ "Một chiều" bị thiếu trong file cũ, mình đã bổ sung */}
-                      <span className="text-[12px] text-gray-400 mt-0.5">Một Chiều</span>
+                      <span className="text-[12px] text-gray-400 mt-0.5">
+                        {cb.duffel_raw?.slices?.length === 2 ? 'Khứ Hồi' : 'Một Chiều'}
+                      </span>
                     </div>
                     <div className="text-[#007aff] opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
