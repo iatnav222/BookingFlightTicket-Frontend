@@ -305,7 +305,7 @@ const Home = () => {
                         {(cb.gia_thap_nhat || 0).toLocaleString('vi-VN')} VND
                       </span>
                       <span className="text-[12px] text-gray-400 mt-0.5">
-                        {cb.chi_tiet_chuyen?.length === 2 ? "Khứ hồi" : "Một chiều"}
+                        {cb.duffel_raw?.slices?.length === 2 ? 'Khứ Hồi' : 'Một Chiều'}
                       </span>
                     </div>
                     <div className="text-[#007aff] opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
