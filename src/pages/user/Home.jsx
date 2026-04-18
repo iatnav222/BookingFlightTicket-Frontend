@@ -5,13 +5,6 @@ import {
   FaChevronLeft, FaChevronRight, FaTag, FaHeadset, 
   FaShieldAlt, FaCheckCircle 
 } from 'react-icons/fa';
-// Import Swiper
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-
 // CHỈ IMPORT NHỮNG API ĐÃ ĐƯỢC TẠO
 // Import các API đã có
 import { sanBayApi } from '../../services/Sanbayapi';
@@ -27,7 +20,8 @@ const Home = () => {
   const [popularDestinations, setPopularDestinations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [airlines, setAirlines] = useState([]);
-  
+  const [currentPage, setCurrentPage] = useState(1);
+  const flightsPerPage = 10;
   // DỮ LIỆU TĨNH TẠM THỜI (Để tránh lỗi chưa có API khi push Vercel)
   const promotions = [
     { maKM: 1, ten_km: "Chào hè rực rỡ", giamPhanTram: 20, anh: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500&auto=format&fit=crop" },
@@ -53,46 +47,41 @@ const Home = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Gọi riêng lẻ để nếu 1 cái lỗi, các cái khác vẫn chạy được
+        // Gọi đồng thời cả 3 API để tiết kiệm thời gian chờ
         const fetchSB = sanBayApi.getDanhSachClient().catch(err => {
-          console.error("Lỗi sân bay:", err);
-          return null;
+          console.error("Lỗi sân bay:", err); return null;
         });
         const fetchCB = chuyenBayApi.getDanhSachClient({ per_page: 10 }).catch(err => {
-          console.error("Lỗi chuyến bay:", err);
-          return null;
+          console.error("Lỗi chuyến bay:", err); return null;
         });
         const fetchHHK = hangHangKhongApi.getDanhSachClient().catch(err => {
-          console.error("Lỗi hãng bay:", err);
-          return null;
+          console.error("Lỗi hãng bay:", err); return null;
         });
-
         const [resSB, resCB, resHHK] = await Promise.all([fetchSB, fetchCB, fetchHHK]);
-
-        // Kiểm tra dữ liệu trước khi gán để tránh lỗi 'undefined'
+        // 1. Gán dữ liệu Sân bay & Điểm đến yêu thích
         if (resSB && resSB.data) {
           const sbData = resSB.data.data || resSB.data || [];
           setSanBays(sbData);
-          setPopularDestinations(sbData.slice(0, 5));
+          setPopularDestinations(sbData.slice(0, 6)); // Lấy 6 sân bay đầu tiên cho đẹp lưới Grid
         }
-
+        // 2. Gán dữ liệu Chuyến bay (Giữ nguyên logic cũ)
         if (resCB && resCB.data) {
-          setCheapFlights(resCB.data.data || resCB.data || []);
+          const flightData = resCB.data.data || resCB.data.offers || resCB.data || [];
+          setCheapFlights(flightData);
         }
-
+        // 3. Gán dữ liệu Hãng hàng không
         if (resHHK && resHHK.data) {
           setAirlines(resHHK.data.data || resHHK.data || []);
         }
-
       } catch (error) {
         console.error("Lỗi tổng quát:", error);
       } finally {
         setLoading(false);
       }
     };
+
     fetchData();
   }, []);
-
   // Đóng popup pax
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -132,8 +121,19 @@ const Home = () => {
       </div>
     );
   }
+  const indexOfLastFlight = currentPage * flightsPerPage;
+  const indexOfFirstFlight = indexOfLastFlight - flightsPerPage;
+  // Cắt mảng tổng thành mảng con chỉ chứa vé của trang hiện tại
+  const currentFlights = cheapFlights.slice(indexOfFirstFlight, indexOfLastFlight);
+  const totalPages = Math.ceil(cheapFlights.length / flightsPerPage);
 
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    // (Tuỳ chọn) Cuộn mượt mà lên đầu danh sách vé khi chuyển trang
+    document.getElementById('ve-re-section').scrollIntoView({ behavior: 'smooth' });
+  };
   return (
+    
     <div className="font-sans bg-gray-50 text-gray-800">
       {/* 1. BANNER & SEARCH */}
       <div className="relative w-full h-[680px] overflow-hidden bg-gray-900">
@@ -249,62 +249,109 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 3. VÉ RẺ HÔM NAY (SWIPER) */}
-      <section className="max-w-7xl mx-auto px-4 my-16">
+      {/* 3. VÉ RẺ HÔM NAY (PHÂN TRANG) */}
+      <section id="ve-re-section" className="max-w-7xl mx-auto px-4 my-16 scroll-mt-24">
         <div className="flex justify-between items-end mb-8">
           <div>
             <h2 className="text-3xl font-black text-[#1e3c72] mb-1">⚡ Vé Rẻ Hôm Nay</h2>
             <p className="text-gray-500">Cơ hội bay với mức giá tốt nhất trong tháng</p>
-          </div>
-          <div className="flex gap-2">
-            <button className="swiper-prev p-3 bg-white border rounded-full hover:bg-gray-100 shadow-sm transition-colors"><FaChevronLeft /></button>
-            <button className="swiper-next p-3 bg-white border rounded-full hover:bg-gray-100 shadow-sm transition-colors"><FaChevronRight /></button>
           </div>
         </div>
         
         {cheapFlights.length === 0 ? (
             <div className="text-center text-gray-500 py-10 font-bold">Đang cập nhật các chuyến bay giá rẻ...</div>
         ) : (
-            <Swiper
-              modules={[Navigation, Pagination]}
-              spaceBetween={25}
-              slidesPerView={1}
-              navigation={{ nextEl: '.swiper-next', prevEl: '.swiper-prev' }}
-              pagination={{ clickable: true }}
-              breakpoints={{ 640: { slidesPerView: 2 }, 1024: { slidesPerView: 4 } }}
-              className="pb-12"
-            >
-              {cheapFlights.map(cb => (
-                <SwiperSlide key={cb.maChuyenBay}>
-                  <div onClick={() => navigate(`/dat-ve/chon-ghe/${cb.maChuyenBay}`)} className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden hover:-translate-y-2 hover:shadow-xl transition-all cursor-pointer group">
-                    <div className="relative h-40">
-                      <img src={cb.san_bay_den?.hinh_anh_url || "https://via.placeholder.com/500x300"} className="w-full h-full object-cover group-hover:scale-105 transition-transform" alt="Dest" />
-                      <div className="absolute top-3 left-3 bg-[#ff5e1f] text-white px-3 py-1 rounded-full text-[10px] font-bold">GIÁ TỐT NHẤT</div>
+          <>
+            {/* Lưới danh sách vé - Dùng mảng currentFlights thay vì cheapFlights */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-6">
+              {currentFlights.map(cb => (
+                <div 
+                  key={cb.maChuyenBay}
+                  onClick={() => navigate(`/dat-ve/chon-ghe/${cb.maChuyenBay}`, { state: { flightDetails: cb } })} 
+                  className="bg-white rounded-xl border border-blue-50/80 shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:border-blue-300 hover:shadow-[0_8px_20px_rgba(0,122,255,0.08)] transition-all duration-300 cursor-pointer flex items-center p-5 gap-4 group"
+                >
+                  {/* 1. Cột Logo Hãng */}
+                  <div className="w-16 flex-shrink-0 flex justify-center items-center">
+                    {cb.hang_hang_khong?.logo ? (
+                      <img src={cb.hang_hang_khong?.logo} className="max-w-full max-h-8 object-contain" alt="Logo" />
+                    ) : (
+                      <div className="w-8 h-8 bg-gray-100 rounded-full"></div>
+                    )}
+                  </div>
+
+                  {/* 2. Cột Thông tin tuyến bay */}
+                  <div className="flex-1 flex flex-col justify-center overflow-hidden px-2">
+                    <span className="text-[14px] text-gray-700 mb-1">
+                      {cb.hang_hang_khong?.tenHang || "Hãng bay"}
+                    </span>
+                    <div className="text-[16px] font-bold text-gray-900 mb-1.5 flex items-center gap-2">
+                      <span className="whitespace-nowrap">
+                        {cb.san_bay_di?.tenSanBay}
+                      </span>
+                      <span className="text-[20px] text-gray-400 font-medium text-sm">→</span>
+                      <span className="whitespace-nowrap truncate">
+                        {cb.san_bay_den?.tenSanBay}
+                      </span>
                     </div>
-                    <div className="p-5">
-                      <div className="flex justify-between items-center mb-4 font-bold">
-                        <span>{cb.san_bay_di?.maCode}</span>
-                        <FaPlaneDeparture className="text-blue-500" />
-                        <span className="text-blue-600">{cb.san_bay_den?.maCode}</span>
-                      </div>
-                      <div className="flex items-center gap-2 mb-4">
-                        {cb.hang_hang_khong?.logo_url && <img src={cb.hang_hang_khong?.logo_url} className="w-6 h-6 object-contain" alt="Logo" />}
-                        <span className="text-xs text-gray-400 font-medium">
-                            {new Date(cb.ngayGioCatCanh).toLocaleDateString('vi-VN')} • {new Date(cb.ngayGioCatCanh).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'})}
-                        </span>
-                      </div>
-                      <div className="pt-3 border-t flex justify-between items-center">
-                        <div>
-                          <small className="block text-[10px] text-gray-400 uppercase font-bold">Chỉ từ</small>
-                          <span className="text-xl font-black text-red-500">{(cb.gia_ves?.find(v => v.loaiHanhKhach === 'NguoiLon')?.giaTien || 0).toLocaleString('vi-VN')}đ</span>
-                        </div>
-                        <button className="bg-blue-50 text-blue-600 font-bold px-4 py-1.5 rounded-full text-sm group-hover:bg-blue-600 group-hover:text-white transition-colors">Đặt ngay</button>
-                      </div>
+                    <span className="text-[13px] text-gray-500">
+                      {new Date(cb.ngayGioCatCanh).toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                  </div>
+
+                  {/* 3. Cột Giá tiền & Mũi tên */}
+                  <div className="flex items-center gap-4 pl-2">
+                    <div className="flex flex-col items-end justify-center">
+                      <span className="text-[18px] font-medium text-[#007aff]">
+                        {(cb.gia_thap_nhat || 0).toLocaleString('vi-VN')} VND
+                      </span>
+                      {/* Chữ "Một chiều" bị thiếu trong file cũ, mình đã bổ sung */}
+                      <span className="text-[12px] text-gray-400 mt-0.5">Một Chiều</span>
+                    </div>
+                    <div className="text-[#007aff] opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
                     </div>
                   </div>
-                </SwiperSlide>
+                </div>
               ))}
-            </Swiper>
+            </div>
+
+            {/* Các nút Phân Trang */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-8">
+                <button 
+                  onClick={() => handlePageChange(currentPage - 1)} 
+                  disabled={currentPage === 1}
+                  className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <FaChevronLeft className="text-xs" />
+                </button>
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
+                  <button
+                    key={number}
+                    onClick={() => handlePageChange(number)}
+                    className={`w-10 h-10 rounded-full font-bold text-sm transition-all ${
+                      currentPage === number 
+                        ? 'bg-[#007aff] text-white shadow-md' 
+                        : 'bg-transparent text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    {number}
+                  </button>
+                ))}
+
+                <button 
+                  onClick={() => handlePageChange(currentPage + 1)} 
+                  disabled={currentPage === totalPages}
+                  className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <FaChevronRight className="text-xs" />
+                </button>
+              </div>
+            )}
+          </>
         )}
       </section>
 
@@ -323,7 +370,12 @@ const Home = () => {
                  onClick={() => navigate(`/dat-ve/tim-kiem?maSanBayDen=${dest.maSanBay}`)}
                  className={`relative rounded-3xl overflow-hidden cursor-pointer group shadow-lg ${i < 2 ? 'md:col-span-3' : 'md:col-span-2'}`}
                >
-                 <img src={dest.hinh_anh_url || "https://via.placeholder.com/500x500"} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={dest.thanhPho} />
+                 <img 
+                    // Dùng hinhAnh thay vì hinh_anh_url, có ảnh dự phòng nếu BE trả về null
+                    src={dest.hinhAnh || dest.hinh_anh_url || "https://images.unsplash.com/photo-1508009603885-247a53c98dc4?auto=format&fit=crop&w=800&q=80"} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                    alt={dest.thanhPho} 
+                  />
                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end text-white">
                    <h4 className="text-2xl font-bold">{dest.thanhPho}</h4>
                    <p className="text-sm opacity-80 flex items-center gap-1"><FaPlaneArrival /> Sân bay {dest.tenSanBay}</p>
@@ -360,8 +412,14 @@ const Home = () => {
       <section className="max-w-7xl mx-auto px-4 py-20">
         <h5 className="text-center text-gray-400 font-bold uppercase tracking-widest mb-10 text-sm">Đối Tác Hàng Không</h5>
         <div className="flex flex-wrap justify-center items-center gap-10 md:gap-16 opacity-60 hover:opacity-100 transition-opacity mb-20">
-          {airlines.map(hang => hang.logo_url && (
-            <img key={hang.maHang} src={hang.logo_url} alt={hang.tenHang} className="h-8 md:h-10 grayscale hover:grayscale-0 transition-all cursor-pointer" title={hang.tenHang} />
+          {airlines.map(hang => (hang.logo || hang.logo_url) && (
+            <img 
+              key={hang.maHang} 
+              src={hang.logo || hang.logo_url} 
+              alt={hang.tenHang} 
+              className="h-8 md:h-10 grayscale hover:grayscale-0 transition-all cursor-pointer object-contain" 
+              title={hang.tenHang} 
+            />
           ))}
         </div>
 
