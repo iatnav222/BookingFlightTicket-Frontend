@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   
   FaPlane,
-  
+ 
   FaChevronLeft,
   FaChevronRight,
   FaFilter,
@@ -16,13 +16,7 @@ import { hangHangKhongApi } from '../../../services/hangHangKhongApi';
 
 const todayStr = () => new Date().toISOString().split('T')[0];
 
-const formatVNDate = (date) =>
-  new Intl.DateTimeFormat('vi-VN', {
-    weekday: 'long',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(date);
+
 
 const formatDateShort = (date) =>
   new Intl.DateTimeFormat('vi-VN', {
@@ -87,7 +81,7 @@ const TimKiemChuyenBay = () => {
     hang_bay: searchParams.getAll('hang_bay') || [],
   });
 
-  const totalPax = query.soNguoiLon + query.soTreEm + query.soEmBe;
+  
 
   const [visibleDates, setVisibleDates] = useState([]);
 
@@ -220,14 +214,7 @@ const TimKiemChuyenBay = () => {
     syncQuery({ ngayDi: dateStr });
   };
 
-  const toggleHangBay = (maHang) => {
-    const code = String(maHang);
-    const current = query.hang_bay || [];
-    const next = current.includes(code)
-      ? current.filter((x) => x !== code)
-      : [...current, code];
-    syncQuery({ hang_bay: next });
-  };
+  
 
   const clearFilters = () => {
     const next = {
