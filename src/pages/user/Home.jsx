@@ -161,7 +161,7 @@ const Home = () => {
                   <FaPlaneDeparture className="mr-3 text-gray-400 shrink-0" />
                   <select name="maSanBayDi" onChange={(e) => setSearchData({...searchData, maSanBayDi: e.target.value})} className="w-full h-full bg-transparent outline-none font-bold text-lg cursor-pointer" required>
                     <option value="" hidden>Chọn nơi đi</option>
-                    {sanBays.map(sb => <option key={sb.maSanBay} value={sb.maSanBay}>{sb.thanhPho} ({sb.maCode})</option>)}
+                    {sanBays.map(sb => <option key={sb.maSanBay} value={sb.maCode}>{sb.thanhPho} ({sb.maCode})</option>)}
                   </select>
                 </div>
               </div>

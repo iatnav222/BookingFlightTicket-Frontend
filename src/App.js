@@ -34,6 +34,7 @@ import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import ProtectedRoute from './components/admin/ProtectedRoute';
+import TimKiemChuyenBay from './pages/user/dat-ve/TimKiemChuyenBay';
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
           {/* Đã bỏ dấu '/' ở đầu để chuẩn relative path */}
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="reset-password" element={<ResetPassword />} />
+          <Route path="dat-ve/tim-kiem" element={<TimKiemChuyenBay />} />
         </Route>
 
         {/* ==========================================
