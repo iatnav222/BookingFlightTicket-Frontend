@@ -31,6 +31,7 @@ import Home from './pages/user/Home';
 import Users from './Users'; 
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import TimKiemChuyenBay from './pages/user/dat-ve/TimKiemChuyenBay';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import ProtectedRoute from './components/admin/ProtectedRoute';
@@ -45,14 +46,11 @@ function App() {
         <Route path="/" element={<UserLayout />}>
           <Route index element={<Home />} />
           <Route path="users" element={<Users />} />
-          {/* Đã bỏ dấu '/' ở đầu để chuẩn relative path */}
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="reset-password" element={<ResetPassword />} />
+          <Route path="dat-ve/tim-kiem" element={<TimKiemChuyenBay />} />
         </Route>
 
-        {/* ==========================================
-            NHÓM ADMIN (Hiển thị Sidebar Admin) 
-            ========================================== */}
         <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminHome />} />
@@ -102,9 +100,6 @@ function App() {
           </Route>            
         </Route>
 
-        {/* ==========================================
-            NHÓM AUTH (Không hiển thị Header/Footer) 
-            ========================================== */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
       </Routes>
