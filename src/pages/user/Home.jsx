@@ -22,7 +22,7 @@ const Home = () => {
   const [airlines, setAirlines] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const flightsPerPage = 10;
-  // DỮ LIỆU TĨNH TẠM THỜI (Để tránh lỗi chưa có API khi push Vercel)
+  // DỮ LIỆU TĨNH TẠM THỜI
   const promotions = [
     { maKM: 1, ten_km: "Chào hè rực rỡ", giamPhanTram: 20, anh: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500&auto=format&fit=crop" },
     { maKM: 2, ten_km: "Bay cùng gia đình", giamPhanTram: 15, anh: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=500&auto=format&fit=crop" },
@@ -110,7 +110,6 @@ const Home = () => {
     navigate(`/dat-ve/tim-kiem?${query.toString()}`);
   };
 
-  // SỬ DỤNG BIẾN LOADING Ở ĐÂY ĐỂ HIỂN THỊ MÀN HÌNH CHỜ VÀ SỬA LỖI ESLINT
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -136,7 +135,7 @@ const Home = () => {
     
     <div className="font-sans bg-gray-50 text-gray-800">
       {/* 1. BANNER & SEARCH */}
-      <div className="relative w-full h-[680px] overflow-hidden bg-gray-900">
+      <div className="relative w-full h-[680px] bg-gray-900">
         <img src="/assets/img/banner.png" alt="Banner" className="object-cover w-full h-full opacity-60" />
         <div className="absolute w-full text-center text-white transform -translate-x-1/2 -translate-y-1/2 top-[35%] left-1/2">
           <h1 className="text-4xl font-extrabold uppercase md:text-6xl mb-4 drop-shadow-lg">Vi vu khắp chốn</h1>
@@ -161,7 +160,7 @@ const Home = () => {
                   <FaPlaneDeparture className="mr-3 text-gray-400 shrink-0" />
                   <select name="maSanBayDi" onChange={(e) => setSearchData({...searchData, maSanBayDi: e.target.value})} className="w-full h-full bg-transparent outline-none font-bold text-lg cursor-pointer" required>
                     <option value="" hidden>Chọn nơi đi</option>
-                    {sanBays.map(sb => <option key={sb.maSanBay} value={sb.maSanBay}>{sb.thanhPho} ({sb.maCode})</option>)}
+                    {sanBays.map(sb => <option key={sb.maSanBay} value={sb.maCode}>{sb.thanhPho} ({sb.maCode})</option>)}
                   </select>
                 </div>
               </div>
@@ -202,17 +201,50 @@ const Home = () => {
                 {showPaxPopup && (
                   <div className="absolute top-[75px] left-0 w-[300px] bg-white p-5 rounded-2xl shadow-2xl border z-50">
                     <h6 className="font-bold mb-4 border-b pb-2">Hành khách</h6>
-                    {[ ['nl','Người lớn','Từ 12 tuổi'], ['te','Trẻ em','2-11 tuổi'], ['eb','Em bé','Dưới 2 tuổi'] ].map(([k, t, s]) => (
+                    {[
+                      ['nl', 'Người lớn', 'Từ 12 tuổi'],
+                      ['te', 'Trẻ em', '2-11 tuổi'],
+                      ['eb', 'Em bé', 'Dưới 2 tuổi']
+                    ].map(([k, t, s]) => (
                       <div key={k} className="flex justify-between items-center mb-4">
-                        <div><span className="block font-bold">{t}</span><small className="text-gray-400">{s}</small></div>
-                        <div className="flex items-center gap-3">
-                          <button type="button" onClick={() => updatePax(k, -1)} className="w-8 h-8 border rounded-full hover:bg-gray-100">-</button>
-                          <span className="font-bold w-4 text-center">{pax[k]}</span>
-                          <button type="button" onClick={() => updatePax(k, 1)} className="w-8 h-8 border rounded-full hover:bg-gray-100">+</button>
+                        <div>
+                          <span className="block font-bold">{t}</span>
+                          <small className="text-gray-400">{s}</small>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          {/* Nút trừ */}
+                          <button
+                            type="button"
+                            onClick={() => updatePax(k, -1)}
+                            className="w-8 h-8 flex items-center justify-center border rounded-full hover:bg-gray-100 text-lg font-medium"
+                          >
+                            -
+                          </button>
+                          
+                          {/* Hiển thị số lượng - thêm inline-block và tăng w-6 */}
+                          <span className="font-bold w-6 inline-block text-center text-gray-900">
+                            {pax[k] !== undefined ? pax[k] : 0}
+                          </span>
+                          
+                          {/* Nút cộng */}
+                          <button
+                            type="button"
+                            onClick={() => updatePax(k, 1)}
+                            className="w-8 h-8 flex items-center justify-center border rounded-full hover:bg-gray-100 text-lg font-medium"
+                          >
+                            +
+                          </button>
                         </div>
                       </div>
                     ))}
-                    <button type="button" onClick={() => setShowPaxPopup(false)} className="w-full py-2 bg-blue-600 text-white font-bold rounded-xl mt-2">Xong</button>
+                    <button
+                      type="button"
+                      onClick={() => setShowPaxPopup(false)}
+                      className="w-full py-2 bg-blue-600 hover:bg-blue-700 transition-colors text-white font-bold rounded-xl mt-2"
+                    >
+                      Xong
+                    </button>
                   </div>
                 )}
               </div>
