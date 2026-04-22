@@ -27,8 +27,8 @@ import KhuyenMaiForm from './pages/admin/khuyen-mai/KhuyenMaiForm';
 import DoanhThu from './pages/admin/doanh-thu/DoanhThu';
 
 // 3. Import Pages - Nhóm User & Auth
-import Home from './pages/user/Home'; 
-import Users from './Users'; 
+import Home from './pages/user/Home';
+import Users from './Users';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import TimKiemChuyenBay from './pages/user/dat-ve/TimKiemChuyenBay';
@@ -36,6 +36,9 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 
+import ThongTinHanhKhach from './pages/user/dat-ve/ThongTinHanhKhach';
+import ThanhToan from './pages/user/dat-ve/ThanhToan';
+import KetQuaThanhToan from './pages/user/dat-ve/KetQuaThanhToan';
 function App() {
   return (
     <Router>
@@ -49,12 +52,15 @@ function App() {
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="reset-password" element={<ResetPassword />} />
           <Route path="dat-ve/tim-kiem" element={<TimKiemChuyenBay />} />
+          <Route path="dat-ve/chon-ghe/:id" element={<ThongTinHanhKhach />} />
+          <Route path="dat-ve/thanh-toan/:maDonHang" element={<ThanhToan />} />
+          <Route path="thanh-toan/ket-qua" element={<KetQuaThanhToan />} />
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminHome />} />
-          
+
             {/* Quản lý Chuyến Bay */}
             <Route path="chuyen-bay" element={<ChuyenBayList />} />
             <Route path="chuyen-bay/tao" element={<ChuyenBayForm />} />
@@ -71,7 +77,7 @@ function App() {
             <Route path="tai-khoan/xem/:id" element={<TaiKhoanShow />} />
 
             {/* Quản lý Máy Bay */}
-            <Route path="may-bay" element={<MayBayList/>} />
+            <Route path="may-bay" element={<MayBayList />} />
             <Route path="may-bay/tao" element={<MayBayForm />} />
             <Route path="may-bay/sua/:id" element={<MayBayForm />} />
 
@@ -84,7 +90,7 @@ function App() {
             <Route path="san-bay" element={<SanBayList />} />
             <Route path="san-bay/tao" element={<SanBayForm />} />
             <Route path="san-bay/sua/:id" element={<SanBayForm />} />
-          
+
             {/* Quản lý Giá Vé */}
             <Route path="gia-ve" element={<GiaVeList />} />
             <Route path="gia-ve/tao" element={<GiaVeForm />} />
@@ -94,10 +100,10 @@ function App() {
             <Route path="khuyen-mai" element={<KhuyenMaiList />} />
             <Route path="khuyen-mai/tao" element={<KhuyenMaiForm />} />
             <Route path="khuyen-mai/sua/:id" element={<KhuyenMaiForm />} />
-          
+
             {/* Quản lý Doanh Thu */}
             <Route path="doanh-thu" element={<DoanhThu />} />
-          </Route>            
+          </Route>
         </Route>
 
         <Route path="/login" element={<Login />} />

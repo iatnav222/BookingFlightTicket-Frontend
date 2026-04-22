@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  FaPlaneDeparture, FaPlaneArrival, FaUserFriends, FaSearch, 
-  FaChevronLeft, FaChevronRight, FaTag, FaHeadset, 
-  FaShieldAlt, FaCheckCircle 
+import {
+  FaPlaneDeparture, FaPlaneArrival, FaUserFriends, FaSearch,
+  FaChevronLeft, FaChevronRight, FaTag, FaHeadset,
+  FaShieldAlt, FaCheckCircle
 } from 'react-icons/fa';
 // CHỈ IMPORT NHỮNG API ĐÃ ĐƯỢC TẠO
 // Import các API đã có
@@ -13,7 +13,7 @@ import { hangHangKhongApi } from '../../services/hangHangKhongApi';
 
 const Home = () => {
   const navigate = useNavigate();
-  
+
   // --- STATE DỮ LIỆU ---
   const [sanBays, setSanBays] = useState([]);
   const [cheapFlights, setCheapFlights] = useState([]);
@@ -132,7 +132,7 @@ const Home = () => {
     document.getElementById('ve-re-section').scrollIntoView({ behavior: 'smooth' });
   };
   return (
-    
+
     <div className="font-sans bg-gray-50 text-gray-800">
       {/* 1. BANNER & SEARCH */}
       <div className="relative w-full h-[680px] bg-gray-900">
@@ -152,13 +152,13 @@ const Home = () => {
                 <input type="radio" value="khu-hoi" checked={tripType === 'khu-hoi'} onChange={(e) => setTripType(e.target.value)} className="w-5 h-5 accent-[#ff5e1f]" /> Khứ hồi
               </label>
             </div>
-            
+
             <div className={`grid gap-4 items-end ${tripType === 'khu-hoi' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-[2fr_2fr_1.5fr_1.5fr_1.5fr_1.2fr]' : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-[2.5fr_2.5fr_2fr_2fr_1.5fr]'}`}>
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-bold text-gray-500 uppercase ml-1">Điểm đi</label>
                 <div className="flex items-center h-[65px] px-4 bg-[#f7f9fc] border-2 border-[#eef1f5] rounded-2xl focus-within:bg-white focus-within:border-[#ff5e1f] transition-all">
                   <FaPlaneDeparture className="mr-3 text-gray-400 shrink-0" />
-                  <select name="maSanBayDi" onChange={(e) => setSearchData({...searchData, maSanBayDi: e.target.value})} className="w-full h-full bg-transparent outline-none font-bold text-lg cursor-pointer" required>
+                  <select name="maSanBayDi" onChange={(e) => setSearchData({ ...searchData, maSanBayDi: e.target.value })} className="w-full h-full bg-transparent outline-none font-bold text-lg cursor-pointer" required>
                     <option value="" hidden>Chọn nơi đi</option>
                     {sanBays.map(sb => <option key={sb.maSanBay} value={sb.maCode}>{sb.thanhPho} ({sb.maCode})</option>)}
                   </select>
@@ -169,7 +169,7 @@ const Home = () => {
                 <label className="text-xs font-bold text-gray-500 uppercase ml-1">Điểm đến</label>
                 <div className="flex items-center h-[65px] px-4 bg-[#f7f9fc] border-2 border-[#eef1f5] rounded-2xl focus-within:bg-white focus-within:border-[#ff5e1f] transition-all">
                   <FaPlaneArrival className="mr-3 text-gray-400 shrink-0" />
-                  <select name="maSanBayDen" onChange={(e) => setSearchData({...searchData, maSanBayDen: e.target.value})} className="w-full h-full bg-transparent outline-none font-bold text-lg cursor-pointer" required>
+                  <select name="maSanBayDen" onChange={(e) => setSearchData({ ...searchData, maSanBayDen: e.target.value })} className="w-full h-full bg-transparent outline-none font-bold text-lg cursor-pointer" required>
                     <option value="" hidden>Chọn nơi đến</option>
                     {sanBays.map(sb => <option key={sb.maSanBay} value={sb.maSanBay}>{sb.thanhPho} ({sb.maCode})</option>)}
                   </select>
@@ -179,7 +179,7 @@ const Home = () => {
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-bold text-gray-500 uppercase ml-1">Ngày đi</label>
                 <div className="flex items-center h-[65px] px-4 bg-[#f7f9fc] border-2 border-[#eef1f5] rounded-2xl focus-within:bg-white focus-within:border-[#ff5e1f] transition-all">
-                  <input type="date" name="ngayDi" onChange={(e) => setSearchData({...searchData, ngayDi: e.target.value})} className="w-full bg-transparent outline-none font-bold" required min={new Date().toISOString().split('T')[0]} />
+                  <input type="date" name="ngayDi" onChange={(e) => setSearchData({ ...searchData, ngayDi: e.target.value })} className="w-full bg-transparent outline-none font-bold" required min={new Date().toISOString().split('T')[0]} />
                 </div>
               </div>
 
@@ -187,7 +187,7 @@ const Home = () => {
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-bold text-gray-500 uppercase ml-1">Ngày về</label>
                   <div className="flex items-center h-[65px] px-4 bg-[#f7f9fc] border-2 border-[#eef1f5] rounded-2xl focus-within:bg-white focus-within:border-[#ff5e1f] transition-all">
-                    <input type="date" name="ngayVe" onChange={(e) => setSearchData({...searchData, ngayVe: e.target.value})} className="w-full bg-transparent outline-none font-bold" required />
+                    <input type="date" name="ngayVe" onChange={(e) => setSearchData({ ...searchData, ngayVe: e.target.value })} className="w-full bg-transparent outline-none font-bold" required />
                   </div>
                 </div>
               )}
@@ -211,7 +211,7 @@ const Home = () => {
                           <span className="block font-bold">{t}</span>
                           <small className="text-gray-400">{s}</small>
                         </div>
-                        
+
                         <div className="flex items-center gap-2">
                           {/* Nút trừ */}
                           <button
@@ -221,12 +221,12 @@ const Home = () => {
                           >
                             -
                           </button>
-                          
+
                           {/* Hiển thị số lượng - thêm inline-block và tăng w-6 */}
                           <span className="font-bold w-6 inline-block text-center text-gray-900">
                             {pax[k] !== undefined ? pax[k] : 0}
                           </span>
-                          
+
                           {/* Nút cộng */}
                           <button
                             type="button"
@@ -289,17 +289,24 @@ const Home = () => {
             <p className="text-gray-500">Cơ hội bay với mức giá tốt nhất trong tháng</p>
           </div>
         </div>
-        
+
         {cheapFlights.length === 0 ? (
-            <div className="text-center text-gray-500 py-10 font-bold">Đang cập nhật các chuyến bay giá rẻ...</div>
+          <div className="text-center text-gray-500 py-10 font-bold">Đang cập nhật các chuyến bay giá rẻ...</div>
         ) : (
           <>
             {/* Lưới danh sách vé - Dùng mảng currentFlights thay vì cheapFlights */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-6">
               {currentFlights.map(cb => (
-                <div 
+                <div
                   key={cb.maChuyenBay}
-                  onClick={() => navigate(`/dat-ve/chon-ghe/${cb.maChuyenBay}`, { state: { flightDetails: cb } })} 
+                  onClick={() => navigate(`/dat-ve/chon-ghe/${cb.maChuyenBay}`, {
+                    state: {
+                      flightDetails: cb,
+                      soNguoiLon: pax.nl,
+                      soTreEm: pax.te,
+                      soEmBe: pax.eb
+                    }
+                  })}
                   className="bg-white rounded-xl border border-blue-50/80 shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:border-blue-300 hover:shadow-[0_8px_20px_rgba(0,122,255,0.08)] transition-all duration-300 cursor-pointer flex items-center p-5 gap-4 group"
                 >
                   {/* 1. Cột Logo Hãng */}
@@ -353,30 +360,29 @@ const Home = () => {
             {/* Các nút Phân Trang */}
             {totalPages > 1 && (
               <div className="flex justify-center items-center gap-2 mt-8">
-                <button 
-                  onClick={() => handlePageChange(currentPage - 1)} 
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
                   className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
                   <FaChevronLeft className="text-xs" />
                 </button>
-                
+
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
                   <button
                     key={number}
                     onClick={() => handlePageChange(number)}
-                    className={`w-10 h-10 rounded-full font-bold text-sm transition-all ${
-                      currentPage === number 
-                        ? 'bg-[#007aff] text-white shadow-md' 
+                    className={`w-10 h-10 rounded-full font-bold text-sm transition-all ${currentPage === number
+                        ? 'bg-[#007aff] text-white shadow-md'
                         : 'bg-transparent text-gray-600 hover:bg-gray-100'
-                    }`}
+                      }`}
                   >
                     {number}
                   </button>
                 ))}
 
-                <button 
-                  onClick={() => handlePageChange(currentPage + 1)} 
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
                   className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
@@ -392,30 +398,30 @@ const Home = () => {
       <section className="max-w-7xl mx-auto px-4 my-20">
         <h2 className="text-3xl font-black text-[#1e3c72] text-center mb-2">✈️ Điểm Đến Yêu Thích</h2>
         <p className="text-center text-gray-500 mb-10">Khám phá những thành phố tuyệt vời nhất</p>
-        
+
         {popularDestinations.length === 0 ? (
-           <div className="text-center text-gray-500 py-10 font-bold">Đang tải danh sách điểm đến...</div>
+          <div className="text-center text-gray-500 py-10 font-bold">Đang tải danh sách điểm đến...</div>
         ) : (
-           <div className="grid grid-cols-1 md:grid-cols-6 gap-6 h-[650px] md:h-[550px]">
-             {popularDestinations.map((dest, i) => (
-               <div 
-                 key={dest.maSanBay} 
-                 onClick={() => navigate(`/dat-ve/tim-kiem?maSanBayDen=${dest.maSanBay}`)}
-                 className={`relative rounded-3xl overflow-hidden cursor-pointer group shadow-lg ${i < 2 ? 'md:col-span-3' : 'md:col-span-2'}`}
-               >
-                 <img 
-                    // Dùng hinhAnh thay vì hinh_anh_url, có ảnh dự phòng nếu BE trả về null
-                    src={dest.hinhAnh || dest.hinh_anh_url || "https://images.unsplash.com/photo-1508009603885-247a53c98dc4?auto=format&fit=crop&w=800&q=80"} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                    alt={dest.thanhPho} 
-                  />
-                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end text-white">
-                   <h4 className="text-2xl font-bold">{dest.thanhPho}</h4>
-                   <p className="text-sm opacity-80 flex items-center gap-1"><FaPlaneArrival /> Sân bay {dest.tenSanBay}</p>
-                 </div>
-               </div>
-             ))}
-           </div>
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-6 h-[650px] md:h-[550px]">
+            {popularDestinations.map((dest, i) => (
+              <div
+                key={dest.maSanBay}
+                onClick={() => navigate(`/dat-ve/tim-kiem?maSanBayDen=${dest.maSanBay}`)}
+                className={`relative rounded-3xl overflow-hidden cursor-pointer group shadow-lg ${i < 2 ? 'md:col-span-3' : 'md:col-span-2'}`}
+              >
+                <img
+                  // Dùng hinhAnh thay vì hinh_anh_url, có ảnh dự phòng nếu BE trả về null
+                  src={dest.hinhAnh || dest.hinh_anh_url || "https://images.unsplash.com/photo-1508009603885-247a53c98dc4?auto=format&fit=crop&w=800&q=80"}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  alt={dest.thanhPho}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end text-white">
+                  <h4 className="text-2xl font-bold">{dest.thanhPho}</h4>
+                  <p className="text-sm opacity-80 flex items-center gap-1"><FaPlaneArrival /> Sân bay {dest.tenSanBay}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </section>
 
@@ -446,12 +452,12 @@ const Home = () => {
         <h5 className="text-center text-gray-400 font-bold uppercase tracking-widest mb-10 text-sm">Đối Tác Hàng Không</h5>
         <div className="flex flex-wrap justify-center items-center gap-10 md:gap-16 opacity-60 hover:opacity-100 transition-opacity mb-20">
           {airlines.map(hang => (hang.logo || hang.logo_url) && (
-            <img 
-              key={hang.maHang} 
-              src={hang.logo || hang.logo_url} 
-              alt={hang.tenHang} 
-              className="h-8 md:h-10 grayscale hover:grayscale-0 transition-all cursor-pointer object-contain" 
-              title={hang.tenHang} 
+            <img
+              key={hang.maHang}
+              src={hang.logo || hang.logo_url}
+              alt={hang.tenHang}
+              className="h-8 md:h-10 grayscale hover:grayscale-0 transition-all cursor-pointer object-contain"
+              title={hang.tenHang}
             />
           ))}
         </div>

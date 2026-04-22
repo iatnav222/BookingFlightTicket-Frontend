@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import {  
-  FaPlane, FaChevronLeft, FaChevronRight, FaFilter,} from 'react-icons/fa';
+import {
+  FaPlane, FaChevronLeft, FaChevronRight, FaFilter,
+} from 'react-icons/fa';
 
 import { sanBayApi } from '../../../services/Sanbayapi';
 import { chuyenBayApi } from '../../../services/chuyenBayApi';
@@ -70,7 +71,7 @@ const TimKiemChuyenBay = () => {
     hang_bay: searchParams.getAll('hang_bay') || [],
   });
 
-const toggleHangBay = (maHang) => {
+  const toggleHangBay = (maHang) => {
     const code = String(maHang);
     const current = query.hang_bay || [];
     const next = current.includes(code)
@@ -78,7 +79,7 @@ const toggleHangBay = (maHang) => {
       : [...current, code];
     syncQuery({ hang_bay: next });
   };
-  
+
 
   const [visibleDates, setVisibleDates] = useState([]);
 
@@ -121,14 +122,14 @@ const toggleHangBay = (maHang) => {
       setError('');
       try {
         const params = {
-        maSanBayDi: query.maSanBayDi?.split('_')[1]?.toUpperCase(), // HAN
-        maSanBayDen: query.maSanBayDen?.split('_')[1]?.toUpperCase(), // SGN
+          maSanBayDi: query.maSanBayDi?.split('_')[1]?.toUpperCase(), // HAN
+          maSanBayDen: query.maSanBayDen?.split('_')[1]?.toUpperCase(), // SGN
 
-        ngayBay: query.ngayDi,
+          ngayBay: query.ngayDi,
 
-        adults: query.soNguoiLon,
-        children: query.soTreEm,
-        infants: query.soEmBe,
+          adults: query.soNguoiLon,
+          children: query.soTreEm,
+          infants: query.soEmBe,
         };
 
         const res = await chuyenBayApi.getDanhSachClient(params);
@@ -211,7 +212,7 @@ const toggleHangBay = (maHang) => {
     syncQuery({ ngayDi: dateStr });
   };
 
-  
+
 
   const clearFilters = () => {
     const next = {
@@ -290,11 +291,10 @@ const toggleHangBay = (maHang) => {
                 key={dateStr}
                 type="button"
                 onClick={() => handleDateChange(dateStr)}
-                className={`min-w-[102px] rounded-xl border px-3 py-2 text-center transition-all ${
-                  active
-                    ? 'bg-[#007bff] text-white border-[#007bff] shadow-lg'
-                    : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-                }`}
+                className={`min-w-[102px] rounded-xl border px-3 py-2 text-center transition-all ${active
+                  ? 'bg-[#007bff] text-white border-[#007bff] shadow-lg'
+                  : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                  }`}
               >
                 <small className="block text-xs opacity-90">{formatDateShort(d)}</small>
                 <strong className="block text-base">{d.getDate()}/{d.getMonth() + 1}</strong>
@@ -342,7 +342,7 @@ const toggleHangBay = (maHang) => {
                   </div>
                 </div>
 
-               <div className="border-b border-gray-200 pb-4 mb-4">
+                <div className="border-b border-gray-200 pb-4 mb-4">
                   <div className="text-sm font-bold uppercase text-gray-500 mb-2">Hãng hàng không</div>
                   <div className="space-y-2 max-h-[260px] overflow-auto pr-1">
                     {dsHangBay.map((hang) => {
@@ -461,7 +461,13 @@ const toggleHangBay = (maHang) => {
                       className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-[#cce5ff] transition-all cursor-pointer p-5 md:p-6"
                       onClick={() =>
                         navigate(`/dat-ve/chon-ghe/${cb.maChuyenBay}`, {
-                          state: { flightDetails: cb },
+                          state: {
+                            flightDetails: cb,
+                           
+                            adults: query.soNguoiLon, 
+                            children: query.soTreEm, 
+                            infants: query.soEmBe  
+                          },
                         })
                       }
                     >
@@ -491,11 +497,11 @@ const toggleHangBay = (maHang) => {
                             <div className="text-sm text-gray-500 mt-1">
                               {cb.ngayGioCatCanh
                                 ? new Date(cb.ngayGioCatCanh).toLocaleDateString('vi-VN', {
-                                    weekday: 'short',
-                                    day: 'numeric',
-                                    month: 'short',
-                                    year: 'numeric',
-                                  })
+                                  weekday: 'short',
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric',
+                                })
                                 : ''}
                             </div>
                           </div>
