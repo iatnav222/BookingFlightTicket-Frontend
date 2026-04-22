@@ -2,10 +2,10 @@ import api from '../api'; // File cấu hình axios của bạn
 
 export const hangHangKhongApi = {
     getDanhSach(params) {
-        return api.get('/api/admin/hang-hang-khong', { params });
+        return api.get('/api/client/hang-hang-khong', { params });
     },
-    getChiTiet(id) {
-        return api.get(`/api/admin/hang-hang-khong/${id}`);
+    getChiTiet(maCode) {
+        return api.get(`/api/client/hang-hang-khong?search=${maCode}`);
     },
     themHang(data) {
         return api.post('/api/admin/hang-hang-khong', data, {

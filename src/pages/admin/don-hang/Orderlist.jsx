@@ -121,7 +121,7 @@ const OrderList = () => {
                                         <td className="p-3 font-bold text-[#4e73df] text-[15px]">#{o.maCodeDonHang}</td>
                                         <td className="p-3 text-left">
                                             <div className="font-bold text-gray-800 text-[15px]">{o.thongTinLienHe?.ten || o.taikhoan?.hoten || 'Khách vãng lai'}</div>
-                                            <div className="text-gray-500 flex items-center mt-1 text-[13px]"><FaPhoneAlt className="mr-1.5" />{o.thongTinLienHe?.sdt}</div>
+                                            <div className="text-gray-500 flex items-center mt-1 text-[13px]"><FaPhoneAlt className="mr-1.5" />{o.thongTinLienHe?.soDienThoai}</div>
                                         </td>
                                         <td className="p-3 text-gray-700 text-[15px]">{formatDateTime(o.ngayDat)}</td>
                                         <td className="p-3 font-bold text-[#e74a3b] text-[15px]">{o.tongTien?.toLocaleString('vi-VN')} đ</td>

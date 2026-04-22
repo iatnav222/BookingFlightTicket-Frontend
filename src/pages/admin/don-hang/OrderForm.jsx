@@ -59,14 +59,6 @@ const OrderForm = () => {
     if (loading) return <div className="p-10 text-center text-gray-500">Đang tải chi tiết đơn hàng...</div>;
     if (!order) return <div className="p-10 text-center text-red-500">Không tìm thấy đơn hàng!</div>;
 
-    // Nhóm vé theo chuyến bay để hiển thị hành trình
-    const groupedTickets = order.ves?.reduce((groups, ve) => {
-        const cbId = ve.maChuyenBay;
-        if (!groups[cbId]) groups[cbId] = { info: ve.chuyen_bay, tickets: [] };
-        groups[cbId].tickets.push(ve);
-        return groups;
-    }, {}) || {};
-
     const renderStatusBadge = (status) => {
     const baseClass = "px-4 py-2 rounded-full text-[12px] font-bold uppercase shadow-sm whitespace-nowrap";
     switch (Number(status)) {
@@ -78,7 +70,8 @@ const OrderForm = () => {
             return <span className={`bg-[#FFF3CD] text-[#856404] ${baseClass}`}>Chờ thanh toán</span>;
     }
 };
-
+    const cb = order.duffel_raw_data;
+    const danhSachVe = order.ves || [];
     return (
         <div className="container-fluid px-4 mt-4 font-sans text-gray-700 pb-10">
             {/* Header Toolbar */}
@@ -108,7 +101,7 @@ const OrderForm = () => {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label className="block text-xs text-gray-500 uppercase font-semibold">Họ tên</label>
-                                <div className="font-bold text-gray-800">{order.thongTinLienHe?.ten || 'N/A'}</div>
+                                <div className="font-bold text-gray-800">{order.taikhoan?.hoten || 'N/A'}</div>
                             </div>
                             <div>
                                 <label className="block text-xs text-gray-500 uppercase font-semibold">Email</label>
@@ -116,7 +109,7 @@ const OrderForm = () => {
                             </div>
                             <div>
                                 <label className="block text-xs text-gray-500 uppercase font-semibold">Số điện thoại</label>
-                                <div className="text-gray-800">{order.thongTinLienHe?.sdt || 'N/A'}</div>
+                                <div className="text-gray-800">{order.thongTinLienHe?.soDienThoai || 'N/A'}</div>
                             </div>
                         </div>
                     </div>
@@ -127,21 +120,19 @@ const OrderForm = () => {
                             <FaPlane className="mr-2 text-blue-500" /> Chi Tiết Hành Trình
                         </h6>
                         
-                        {Object.values(groupedTickets).map((group, idx) => {
-                            const cb = group.info;
-                            return (
-                                <div key={idx} className="mb-6 last:mb-0 border rounded-lg overflow-hidden">
+                        {cb && (
+                            <div className="mb-6 last:mb-0 border rounded-lg overflow-hidden">
                                     {/* Header Chuyến Bay */}
                                     <div className="bg-blue-50 p-4 flex flex-wrap justify-between items-center border-b">
                                         <div className="flex items-center space-x-4">
                                             <img src={cb.hang_hang_khong?.logo} alt="logo" className="h-8 w-auto object-contain" />
                                             <div>
                                                 <div className="font-bold text-blue-800 flex items-center">
-                                                    {cb.san_bay_di?.thanhPho} ({cb.san_bay_di?.maCode})
+                                                    {cb.san_bay_di?.tenSanBay} ({cb.san_bay_di?.maCode})
                                                     <FaArrowLeft className="mx-3 transform rotate-180 text-gray-400" />
-                                                    {cb.san_bay_den?.thanhPho} ({cb.san_bay_den?.maCode})
+                                                    {cb.san_bay_den?.tenSanBay} ({cb.san_bay_den?.maCode})
                                                 </div>
-                                                <div className="text-xs text-gray-500">{cb.hang_hang_khong?.tenHang} • {cb.maMayBay}</div>
+                                                <div className="text-xs text-gray-500">{cb.hang_hang_khong?.tenHang}</div>
                                             </div>
                                         </div>
                                         <div className="text-right">
@@ -164,7 +155,7 @@ const OrderForm = () => {
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y">
-                                                {group.tickets.map((ve, vIdx) => (
+                                                {danhSachVe.map((ve, vIdx) => (
                                                     <tr key={vIdx} className="hover:bg-gray-50">
                                                         <td className="px-4 py-3 font-mono font-bold text-blue-600">#{ve.maVe}</td>
                                                         <td className="px-4 py-3">
@@ -183,9 +174,9 @@ const OrderForm = () => {
                                             </tbody>
                                         </table>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                </div>                          
+                        )}
+                        {!cb && <div className="text-gray-500 italic text-sm">Không có thông tin hành trình.</div>}
                     </div>
                 </div>
 
@@ -225,17 +216,6 @@ const OrderForm = () => {
                                         <option value="1">Đã xuất vé (Thành công)</option>
                                         <option value="2">Đã hủy đơn hàng</option>
                                     </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1">Mã PNR Hãng Bay</label>
-                                    <input 
-                                        type="text" 
-                                        className="w-full border rounded p-2 text-sm uppercase outline-none focus:border-blue-500"
-                                        placeholder="VD: VN123XYZ"
-                                        value={statusData.maDatChoHang}
-                                        onChange={(e) => setStatusData({...statusData, maDatChoHang: e.target.value.toUpperCase()})}
-                                    />
-                                    <p className="text-[10px] text-gray-400 mt-1 italic italic">Nhập mã code từ hãng sau khi đã xuất vé thành công.</p>
                                 </div>
                                 <button 
                                     type="submit" 
