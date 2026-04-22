@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FaUser, FaPlus, FaMinus, FaArrowRight, FaUsers, FaInfoCircle, FaEnvelope, FaPhone } from 'react-icons/fa';
 import { orderApi } from '../../../services/orderApi';
@@ -14,8 +14,6 @@ const ThongTinHanhKhach = () => {
   const urlTe = parseInt(queryParams.get('te'));
   const urlEb = parseInt(queryParams.get('eb'));
 
-  // Logic: Nếu URL có đầy đủ nl, te, eb (từ trang tìm kiếm) thì mặc định confirmed = true
-  // Nếu không có (đi từ vé rẻ Home) thì mặc định confirmed = false để khách chọn lại
   const hasUrlParams = !isNaN(urlNl);
 
   const [paxCounts, setPaxCounts] = useState({ 
@@ -25,30 +23,12 @@ const ThongTinHanhKhach = () => {
   });
   
   const [isConfirmed, setIsConfirmed] = useState(hasUrlParams);
-
-  // Lưu thông tin liên hệ riêng
   const [contact, setContact] = useState({ email: '', soDienThoai: '' });
   const [passengers, setPassengers] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Tự động kích hoạt tạo form CHỈ KHI có dữ liệu từ URL
-  useEffect(() => {
-    if (hasUrlParams) {
-      handleConfirmPax();
-    }
-  }, []);
-
-  const updatePaxCount = (type, delta) => {
-    setPaxCounts(prev => {
-      const newVal = prev[type] + delta;
-      if (type === 'adult' && newVal < 1) return prev;
-      if (newVal < 0) return prev;
-      return { ...prev, [type]: newVal };
-    });
-    setIsConfirmed(false); // Reset trạng thái xác nhận khi thay đổi số lượng
-  };
-
-  const handleConfirmPax = () => {
+  // Sử dụng useCallback để bao bọc hàm handleConfirmPax, tránh lỗi ESLint dependency
+  const handleConfirmPax = useCallback(() => {
     const initial = [];
     const createPax = (type) => ({
       ho: '', ten: '', ngaySinh: '', gioiTinh: 'Nam',
@@ -61,6 +41,23 @@ const ThongTinHanhKhach = () => {
     
     setPassengers(initial);
     setIsConfirmed(true);
+  }, [paxCounts.adult, paxCounts.child, paxCounts.infant]);
+
+  // Tự động kích hoạt tạo form CHỈ KHI có dữ liệu từ URL
+  useEffect(() => {
+    if (hasUrlParams) {
+      handleConfirmPax();
+    }
+  }, [hasUrlParams, handleConfirmPax]);
+
+  const updatePaxCount = (type, delta) => {
+    setPaxCounts(prev => {
+      const newVal = prev[type] + delta;
+      if (type === 'adult' && newVal < 1) return prev;
+      if (newVal < 0) return prev;
+      return { ...prev, [type]: newVal };
+    });
+    setIsConfirmed(false);
   };
 
   const handlePassengerChange = (index, field, value) => {
@@ -101,7 +98,7 @@ const ThongTinHanhKhach = () => {
           Hoàn tất thông tin đặt vé
         </h2>
 
-        {/* BƯỚC 1: CHỌN SỐ LƯỢNG - Luôn hiển thị để khách có thể chỉnh sửa */}
+        {/* BƯỚC 1: CHỌN SỐ LƯỢNG */}
         <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-6">
           <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-gray-700">
             <FaUsers className="text-[#007bff]" /> 1. Xác nhận số lượng khách
