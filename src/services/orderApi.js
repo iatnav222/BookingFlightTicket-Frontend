@@ -23,5 +23,21 @@ export const orderApi = {
     xoa: async (id) => {
         const res = await api.delete(`/api/admin/don-hang/${id}`);
         return res.data;
+    },
+
+    // === API DÀNH CHO CLIENT (QUY TRÌNH ĐẶT VÉ) ===
+    // Endpoint: POST /api/client/dat-ve/khoi-tao
+    khoiTaoDonHang: async (data) => {
+        const res = await api.post('/api/client/dat-ve/khoi-tao', data);
+        return res.data; 
+        // Lưu ý: Nếu lỗi 422, axios (trong api.js) sẽ ném lỗi, bạn cần try/catch ở UI
+    },
+    // Endpoint: POST /api/client/thanh-toan/vnpay
+    taoUrlThanhToan: async (maDonHang, bankCode = "") => {
+        const res = await api.post('/api/client/thanh-toan/vnpay', {
+            maDonHang: maDonHang,
+            bank_code: bankCode
+        });
+        return res.data;
     }
 };
